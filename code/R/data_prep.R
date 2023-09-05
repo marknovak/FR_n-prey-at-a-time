@@ -2,10 +2,11 @@
 # Clean-up, organize, and save FoRAGE datasets to a list
 ########################################################
 options(warn = 1)
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 forage_meta <- read.csv('../../data/FoRAGE_db_V3_Jan_2_2023.csv')
 forage <-
   read.csv('../../data/FoRAGE_db_V3_Jan_2_2023_original_curves.csv')
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 forage$Rate.is <- tolower(forage$Rate.is)
 forage$Foraging.rate.units <- trimws(forage$Foraging.rate.units)
@@ -46,7 +47,6 @@ forage$Original.Standard.error[sel] <- forage$Original.error[sel] /
 sel <- forage$Rate.is=='mean' & forage$Original.error.units=='Range'
 forage$Original.Standard.error[sel] <- forage$Original.error[sel] / 2 # As assumed by DeLong & Uiterwaal
 
-
 forage_meta$Prey.replaced.[forage_meta$Prey.replaced. == 'N'] <-  FALSE
 forage_meta$Prey.replaced.[forage_meta$Prey.replaced. == 'Y'] <-  TRUE
 forage_meta$Prey.replaced. <- as.logical(forage_meta$Prey.replaced.)
@@ -69,27 +69,33 @@ suspect <- is.na(forage_meta$Pred.per.arena) |
 forage_meta$Pred.per.arena[suspect] <- 1
 
 # Drop treatments that have zero prey offered
-# suspect <- forage$Original.x==0 & forage$Original.y>0
-# unique(forage[suspect,c('Data.set','Source')])
+forage$Original.x <- as.numeric(forage$Original.x)
 keep <- forage$Original.x != 0
 forage <- forage[keep,]
 
+# Drop datasets that aren't present in both sheets
+keep <- unique(forage$Data.set) %in% unique(forage_meta$Data.set)
+forage <- forage[keep,]
+keep <- unique(forage_meta$Data.set) %in% unique(forage$Data.set)
+forage_meta <- forage_meta[keep,]
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ndatasets <- unique(forage$Data.set)
-datasets <- vector(mode = 'list', length = length(ndatasets))
+datasetIDs <- unique(forage$Data.set)
+datasets <- vector(mode = 'list', 
+                   length = length(ndatasets))
 
 pb <- txtProgressBar(min = 0,
-                     max = length(ndatasets))
+                     max = length(datasetIDs))
 b <- 1
 
-for (i in ndatasets) {
-  temp.study <- subset(forage, Data.set == i)
-  temp.info <- subset(forage_meta, Data.set == i)
-  
+for (i in 1:length(datasetIDs)) {
+  temp.study <- subset(forage, forage$Data.set == datasetIDs[i])
+  temp.info <- subset(forage_meta, forage_meta$Data.set == datasetIDs[i])
+
   study.info <- list(
-    datasetID = i,
-    datasetName = paste(i, unique(temp.study$Source), sep='-'),
+    datasetID = datasetIDs[i],
+    datasetName = paste(datasetIDs[i], unique(temp.study$Source), sep='-'),
     source = unique(temp.study$Source),
     pred = unique(temp.study$Predator),
     prey = unique(temp.study$Prey),
@@ -115,7 +121,7 @@ for (i in ndatasets) {
   )
   
   if (any(lapply(study.info, length) > 1)) {
-    stop(paste('Dataset ', i, ' has at least one non-unique attribute.'))
+    stop(paste('Dataset ', datasetIDs[i], ' has at least one non-unique attribute.'))
     print(study.info)
   }
   
@@ -203,7 +209,7 @@ for (i in ndatasets) {
 close(pb)
 
 save(datasets,
-     file = '../../data/datasets.rData')
+     file = '../../data/datasets.Rdata')
 
 ########################################################
 ########################################################
