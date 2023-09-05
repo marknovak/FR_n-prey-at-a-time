@@ -1,9 +1,10 @@
 rm(list = ls())
+
 # set to FALSE if you want to watch messages in real time
 # or TRUE to have them silently saved to file instead.
 sinkMessages <- TRUE
 
-# clear prior fits and errors
+# clear prior fits and errors logs
 ClearAll <- TRUE
 if(ClearAll){
   unlink("../../temp/ErrorLogs/*")
@@ -44,7 +45,7 @@ set.seed(49801)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-skip.datasets <- c(980, 1223:1225)
+skip.datasets <- c(980) # for some reason doesn't play with Holling.n
 
 skipped <- dim(0)
 not.skipped <- dim(0)
@@ -93,7 +94,7 @@ for (i in datasetIDs) {
   #   rpl <- TRUE
   #   }
   
-      # Skip datasets 
+  # Skip datasets 
   if (this.study$interference.study == TRUE | # Interference studies
       rpl |  # non-replacment study
       tme |  # Too many eaten prey
@@ -127,7 +128,7 @@ for (i in datasetIDs) {
   
   # Do data need to be bootstrapped?
   if("Nconsumed.mean" %in% colnames(d)){
-    boot.reps <- 5
+    boot.reps <- 50
   } else{
     boot.reps <- 1
   }

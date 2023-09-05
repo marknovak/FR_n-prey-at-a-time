@@ -10,7 +10,7 @@ ffr.fits <- bundle_fits('../../results/fits')
 fit.order <-
   order.of.fits(ffr.fits,
                 order = TRUE,
-                model = "Holling.n",
+                model = "Holling.II",
                 order.parm = "Sample size")
 ffr.fits <- ffr.fits[rev(fit.order)]
 
@@ -18,8 +18,9 @@ length(ffr.fits)
 
 models <- c(
   'Holling.I',
-  'Holling.II',
-  'Holling.n'
+  'Holling.II'
+  # ,
+  # 'Holling.n'
 )
 
 pdf(
