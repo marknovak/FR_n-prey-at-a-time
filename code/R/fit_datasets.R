@@ -1,4 +1,5 @@
 rm(list = ls())
+# source('lib/load_packages.R')
 
 # Remember to pick between standard for-loop or %do% or %dopar% below as well!
 parallel <- TRUE
@@ -14,7 +15,8 @@ if(parallel){
   sinkMessages <- FALSE
   library(foreach)
   library(doParallel)
-  cl <- parallel::makeForkCluster(3)
+  # cl <- parallel::makeForkCluster(3) # won't work on Windows machines
+  cl <- parallel::makeCluster(3)
   doParallel::registerDoParallel(cl)
 }
 
@@ -31,9 +33,9 @@ length(datasets)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Pull out datasets we want to analyze
-source('lib/data_subset.R')
+source('data_subset.R')
 datasets <- subset_data(datasets, 
-                        printSummaries = TRUE, 
+                        exportSummaries = TRUE, 
                         dir = '../../temp/ErrorLogs/')
 length(datasets)
 
@@ -45,13 +47,13 @@ length(datasets)
 
 # # fit everything on a dataset-by-dataset basis
 # for (i in 1:length(datasets)) {
-# for (i in 1:10) {
-out <-
-  foreach (
-    i = 1:50,
-    # i = 1:length(datasets),
-   .inorder=FALSE) %dopar% {
-   # .inorder=FALSE) %do% {
+for (i in 1:4) {
+# out <-
+#   foreach (
+    # i = 1:5,
+   #  i = 1:length(datasets),
+   # .inorder = FALSE) %dopar% {
+   # .inorder = FALSE) %do% {
              
     set.seed(i)
   
@@ -70,12 +72,11 @@ out <-
 
   # Utility functions 
   source('lib/bootstrap_data.R')
-  source('lib/mytidySumm.R')
   source('lib/plot_coefs.R')
   source('lib/resid_metrics.R')
   source('lib/set_params.R')
   # may throw ignorable warning and takes a while to load because of C++ compiling
-  source('lib/holling_method_one_predator_one_prey.R')
+   suppressWarnings(source('lib/holling_method_one_predator_one_prey.R'))
  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
     
@@ -250,6 +251,8 @@ out <-
 
 if(parallel){
   parallel::stopCluster(cl)
+  showConnections()
+  # closeAllConnections()
 }
 ###########################################################################
 ###########################################################################

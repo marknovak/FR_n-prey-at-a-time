@@ -1,5 +1,6 @@
-
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# A few functions to help with bootstrapping
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # generate boostrapped data from a set of means and SEs of experimental observations
 bootstrap.data <- function(rawdata, replacement) {
   # determine the "names" of all prey present
@@ -18,7 +19,7 @@ bootstrap.data <- function(rawdata, replacement) {
   for (r in 1:nrow(rawdata)) {
     # if for some reason we do not know the SE or sample size for any of the different observations treat that treatment as having a SINGLE replicate
     if (any(is.na(rawdata[r, paste0("Nconsumed", prey, ".se")])) |
-        any(rawdata[r, paste0("Nconsumed", prey, ".se")]==0) |
+        any(rawdata[r, paste0("Nconsumed", prey, ".se")] == 0) |
         any(is.na(rawdata[r, paste0("n")]))) {
       rawdata[r, paste0("Nconsumed", prey, ".se")] <- 0
       rawdata[r, "n"] <- 1
@@ -78,7 +79,10 @@ bootstrap.data <- function(rawdata, replacement) {
   return(d)
 }
 
-# sample a number consumed given mean, se, n, and Nprey (which is necessary for non-replacement studies)
+###################################################################
+
+# sample a number consumed given mean, se, n, and Nprey
+# (which is necessary for non-replacement studies)
 fr.sample <- function(mean, se, n, replacement, Nprey = NULL) {
   # we require Nprey for non-replacement since they are proportion of a total which must be specified
   if (is.null(Nprey) && !replacement) {
@@ -115,3 +119,35 @@ fr.sample <- function(mean, se, n, replacement, Nprey = NULL) {
   
   return(Ne)
 }
+
+###################################################################
+mytidy <- function(fit) {
+  if (typeof(fit) == 'S4') {
+    out <- coef(summary(fit))
+    colnames(out) <-
+      c('estimate', 'std.error', 'statistic', 'p.value')
+    return(out)
+  } else{
+    return(NA)
+  }
+}
+
+
+make.array <- function(ffr.fit, boot.reps) {
+  if (typeof(ffr.fit) == 'S4') {
+    ffr.fit <- mytidy(ffr.fit)
+  }
+  out <- array(NA, dim = c(dim(ffr.fit), boot.reps))
+  dimnames(out) <- dimnames(ffr.fit)
+  return(out)
+}
+
+summarize.boots <- function(x) {
+  c(
+    mean = mean(x, na.rm = TRUE),
+    quantile(x, c(0.025, 0.16, 0.5, 0.84, 0.975), na.rm = TRUE),
+    n = sum(!is.na(x))
+  )
+}
+
+###################################################################

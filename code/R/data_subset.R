@@ -1,6 +1,6 @@
 # Pull out only datasets which we want to analyze
 
-subset_data <- function(datasets, printSummaries = FALSE, dir = NULL){
+subset_data <- function(datasets, exportSummaries = FALSE, dir = NULL){
   
   if(is.null(dir)){dir <- ''}
   
@@ -28,13 +28,14 @@ subset_data <- function(datasets, printSummaries = FALSE, dir = NULL){
       length(unique(x$data$Nprey)) <  3 } ))
   
   keep <- 
-    !more.eaten.than.given
+    replacement.study &
+    !more.eaten.than.given &
     !non.integer.prey &
     !insufficient.trtmts &
     !skip.datasets
     
 
-  if(printSummaries){
+  if(exportSummaries){
     write.table( cbind( datasetIDs[keep], 
                         datasetNames[keep] ), 
                 paste0(dir, 'aaaaNotSkipped.txt'), 
