@@ -1,5 +1,7 @@
 rm(list = ls())
-source('lib/data_subset.R')
+
+# Remember to pick between standard for-loop or %do% or %dopar% below as well!
+parallel <- TRUE
 
 # set to FALSE if you want to watch messages in real time 
 # or are running in parallel, or TRUE to have them silently 
@@ -7,6 +9,14 @@ source('lib/data_subset.R')
 sinkMessages <- TRUE
 # Will post error "task 1 failed - cannot open the connection" if
 # set to TRUE when running in parallel.
+
+if(parallel){
+  sinkMessages <- FALSE
+  library(foreach)
+  library(doParallel)
+  cl <- parallel::makeForkCluster(3)
+  doParallel::registerDoParallel(cl)
+}
 
 # Clear prior fits and errors logs
 ClearAll <- TRUE
@@ -21,6 +31,7 @@ length(datasets)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Pull out datasets we want to analyze
+source('lib/data_subset.R')
 datasets <- subset_data(datasets, 
                         printSummaries = TRUE, 
                         dir = '../../temp/ErrorLogs/')
@@ -34,7 +45,7 @@ length(datasets)
 
 # # fit everything on a dataset-by-dataset basis
 # for (i in 1:length(datasets)) {
-# for (i in 1:50) {
+# for (i in 1:10) {
 out <-
   foreach (
     i = 1:50,
@@ -56,7 +67,6 @@ out <-
      # ,
      # "Holling.n"
    )
-
 
   # Utility functions 
   source('lib/bootstrap_data.R')
@@ -238,7 +248,9 @@ out <-
   file.remove(docs[file.size(docs) == 0])
 }
 
-
+if(parallel){
+  parallel::stopCluster(cl)
+}
 ###########################################################################
 ###########################################################################
 ###########################################################################

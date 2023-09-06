@@ -9,6 +9,7 @@
 library(bbmle)
 library(nloptr)
 library(lamW)
+library(odeintr)
 
 sp <- list.files("..", "set_params.R", 
                  recursive=TRUE, 
@@ -27,7 +28,6 @@ holling.like.1pred.1prey.sys = '
 '
 
 # compile the above C++ code into something we can run in R
-library(odeintr)
 odeintr::compile_sys(
 	"hl_1pred_1prey",
 	holling.like.1pred.1prey.sys,
