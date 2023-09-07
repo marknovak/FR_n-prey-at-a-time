@@ -83,7 +83,7 @@ forage_meta <- forage_meta[keep,]
 
 datasetIDs <- unique(forage$Data.set)
 datasets <- vector(mode = 'list', 
-                   length = length(ndatasets))
+                   length = length(datasetIDs))
 
 pb <- txtProgressBar(min = 0,
                      max = length(datasetIDs))
@@ -92,10 +92,12 @@ b <- 1
 for (i in 1:length(datasetIDs)) {
   temp.study <- subset(forage, forage$Data.set == datasetIDs[i])
   temp.info <- subset(forage_meta, forage_meta$Data.set == datasetIDs[i])
+  
+  AuthorYear <- sub("^([^0-9]*\\d+).*", "\\1", unique(temp.study$Source))
 
   study.info <- list(
     datasetID = datasetIDs[i],
-    datasetName = paste(datasetIDs[i], unique(temp.study$Source), sep='-'),
+    datasetName = paste(datasetIDs[i], AuthorYear, sep='-'),
     source = unique(temp.study$Source),
     pred = unique(temp.study$Predator),
     prey = unique(temp.study$Prey),
