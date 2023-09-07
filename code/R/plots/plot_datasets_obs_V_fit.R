@@ -9,7 +9,7 @@ ffr.fits <- bundle_fits('../../results/fits')
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 fit.order <-
   order.of.fits(ffr.fits,
-                order = TRUE,
+                order = FALSE,
                 model = "Holling.II",
                 order.parm = "Sample size")
 ffr.fits <- ffr.fits[rev(fit.order)]
@@ -19,8 +19,8 @@ length(ffr.fits)
 models <- c(
   'Holling.I',
   'Holling.II'
-  # ,
-  # 'Holling.n'
+  ,
+  'Holling.n'
 )
 
 pdf(
@@ -40,7 +40,7 @@ par(mfcol = c(2, length(models)))
 for (i in 1:length(ffr.fits)) {
   titles <- models
   dataset <- ffr.fits[[i]]$study.info$datasetName
-  titles[1] <- paste(dataset, '\n', titles[1])
+  titles[2] <- paste(dataset, '\n', titles[2])
   for (m in 1:length(models)) {
     
     plot_obsVfit(ffr.fits[[i]], models[m], title = titles[m])
