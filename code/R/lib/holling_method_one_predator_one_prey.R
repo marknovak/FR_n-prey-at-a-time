@@ -19,10 +19,13 @@ source(sp)
 #############################################
 
 # For integration method, define the ode in C++ format
+# Note that exponent terms are not n and (n+1) for numerator and denominator
+# respectively, but rather are (n+1) and (n+2) for numerator and denominator
+# respectively in order to constrain "actual" n (of original model) to be > 1.
 holling.like.1pred.1prey.sys = '
   #include<cmath>
 	// functional response for one predator one prey
-	dxdt[0] = -P * (a * x[0] * (1 - pow( a * h * x[0], n ))) / (1 - pow( a * h * x[0], n + 1));
+	dxdt[0] = -P * (a * x[0] * (1 - pow( a * h * x[0], (n + 1) ))) / (1 - pow( a * h * x[0], (n + 1 + 1)));
 	// consumption rate cannot be positive
 	if(dxdt[0] > 0) dxdt[0] = 0;
 '
@@ -43,9 +46,10 @@ holling.like.1pred.1prey = function(N0, a, h, n, P, T,
                                     overrideTranscendental=FALSE){
 
 	# in a world with replacement everything is hunky dory
+  # (again note +1 in exponent terms; see above)
 	if(replacement){
-		numer <- a * N0 * (1 - (a * h * N0)^n )
-		denom <- (1 - (a * h * N0)^(n+1))
+		numer <- a * N0 * (1 - (a * h * N0)^(n + 1) )
+		denom <- (1 - (a * h * N0)^(n + 1 + 1))
 		N <- (numer / denom) * P * T
 		N <- pmax(0,N)
 		return(N)
