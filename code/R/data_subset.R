@@ -7,8 +7,8 @@ subset_data <- function(datasets, exportSummaries = FALSE, dir = NULL){
   datasetIDs <- unlist(lapply(datasets, function(x){ x$study.info$datasetID} ))
   datasetNames <- unlist(lapply(datasets, function(x){ x$study.info$datasetName} )) 
   
-  skip.datasets <- c(980) # for some reason doesn't play with Holling.n
-  skip.datasets <- datasetIDs == skip.datasets
+  skip.datasets <- c(664, 665, 980) # for some reason doesn't play with Holling.n
+  skip.datasets <- datasetIDs %in% skip.datasets
   
   replacement.study <- 
     unlist(lapply(datasets, function(x){ 
@@ -27,13 +27,15 @@ subset_data <- function(datasets, exportSummaries = FALSE, dir = NULL){
     unlist(lapply(datasets, function(x){
       length(unique(x$data$Nprey)) <  3 } ))
   
+  
+  # ----->  EDIT HERE AS DESIRED  <------ #
   keep <- 
     replacement.study &
     !more.eaten.than.given &
     !non.integer.prey &
     !insufficient.trtmts &
     !skip.datasets
-    
+  # ----------------------------------   #  
 
   if(exportSummaries){
     write.table( cbind( datasetIDs[keep], 
