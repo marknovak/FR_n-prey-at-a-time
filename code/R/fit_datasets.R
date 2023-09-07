@@ -1,22 +1,19 @@
 rm(list = ls())
-# source('lib/load_packages.R')
 
 # Remember to pick between standard for-loop or %do% or %dopar% below as well!
-parallel <- TRUE
+parallel <- FALSE
 
 # set to FALSE if you want to watch messages in real time 
-# or are running in parallel, or TRUE to have them silently 
-# saved to file instead.
+#  or TRUE to have them silently saved to file instead.
+# (will be silent if run in parallel)
 sinkMessages <- TRUE
-# Will post error "task 1 failed - cannot open the connection" if
-# set to TRUE when running in parallel.
 
 if(parallel){
   sinkMessages <- FALSE
   library(foreach)
   library(doParallel)
-  # cl <- parallel::makeForkCluster(3) # won't work on Windows machines
-  cl <- parallel::makeCluster(3)
+  cl <- parallel::makeForkCluster(3) # won't work on Windows machines
+  # cl <- parallel::makeCluster(3)
   doParallel::registerDoParallel(cl)
 }
 
@@ -46,8 +43,8 @@ length(datasets)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # # fit everything on a dataset-by-dataset basis
-# for (i in 1:length(datasets)) {
-for (i in 1:4) {
+for (i in 1:length(datasets)) {
+# for (i in 1:5) {
 # out <-
 #   foreach (
     # i = 1:5,
@@ -66,8 +63,8 @@ for (i in 1:4) {
      "Holling.I"
      ,
      "Holling.II"
-     # ,
-     # "Holling.n"
+     ,
+     "Holling.n"
    )
 
   # Utility functions 
@@ -76,7 +73,7 @@ for (i in 1:4) {
   source('lib/resid_metrics.R')
   source('lib/set_params.R')
   # may throw ignorable warning and takes a while to load because of C++ compiling
-   suppressWarnings(source('lib/holling_method_one_predator_one_prey.R'))
+  source('lib/holling_method_one_predator_one_prey.R')
  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
     
@@ -107,13 +104,13 @@ for (i in 1:4) {
   
   # Do data need to be bootstrapped?
   if("Nconsumed.mean" %in% colnames(d)){
-    boot.reps <- 2
+    boot.reps <- 5
   } else{
     boot.reps <- 1
   }
   
   # create a progress bar that shows how far along the fitting is
-  print(datasetName)
+  print(paste0(i, ' of ', length(datasets), ': ', datasetName))
   pb <- txtProgressBar(min = 0,
                        max = boot.reps)
   
@@ -233,20 +230,20 @@ for (i in 1:4) {
             '.Rdata'
           ))
   
-  # close open streams, etc
-  if (sinkMessages) {
-    sink(type = "message")
-    close(Mesgs)
-    options(warn = 0)
-    readLines(errLog)
+    # close open streams, etc
+    if (sinkMessages) {
+      sink(type = "message")
+      close(Mesgs)
+      options(warn = 0)
+      readLines(errLog)
+
+    # Remove empty error logs
+    docs <-
+      list.files('../../temp/ErrorLogs/',
+                 pattern = "*.txt",
+                 full.names = TRUE)
+    file.remove(docs[file.size(docs) == 0])
   }
-  
-  # Remove empty error logs
-  docs <-
-    list.files('../../temp/ErrorLogs/',
-               pattern = "*.txt",
-               full.names = TRUE)
-  file.remove(docs[file.size(docs) == 0])
 }
 
 if(parallel){
