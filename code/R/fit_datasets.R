@@ -1,82 +1,58 @@
 rm(list = ls())
 
-# Remember to pick between standard for-loop or %do% or %dopar% below as well!
-parallel <- FALSE
-
 # set to FALSE if you want to watch messages in real time 
 #  or TRUE to have them silently saved to file instead.
-# (will be silent if run in parallel)
 sinkMessages <- TRUE
-
-if(parallel){
-  sinkMessages <- FALSE
-  library(foreach)
-  library(doParallel)
-  cl <- parallel::makeForkCluster(3) # won't work on Windows machines
-  # cl <- parallel::makeCluster(3)
-  doParallel::registerDoParallel(cl)
-}
 
 # Clear prior fits and errors logs
 ClearAll <- TRUE
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# select the models which are to be fit
+holling.like.models <- c(
+  "Holling.I"
+  ,
+  "Holling.II"
+  ,
+  "Holling.n"
+)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# How many times to bootstrap each dataset
+# for mean (parametric) and raw (non-parametric) datasets
+
+boot.reps.parm <- boot.reps.nonparm <- 100
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(ClearAll){
   unlink("../../temp/ErrorLogs/*")
   unlink("../../results/fits/*")
 }
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-load('../../data/datasets.Rdata')
-length(datasets)
+# Utility functions 
+source('lib/bootstrap_data.R')
+source('lib/plot_coefs.R')
+source('lib/resid_metrics.R')
+source('lib/set_params.R')
+# may throw ignorable warning and takes a while to load because of C++ compiling
+source('lib/holling_method_one_predator_one_prey.R')
+source('data_subset.R')
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Pull out datasets we want to analyze
-source('data_subset.R')
-datasets <- subset_data(datasets, 
-                        exportSummaries = TRUE, 
-                        dir = '../../temp/ErrorLogs/')
-length(datasets)
+load('../../data/datasets.Rdata')
+datasets <- subset_data(datasets, exportSummaries = TRUE)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Let's start analyzing!
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 # # fit everything on a dataset-by-dataset basis
 for (i in 1:length(datasets)) {
-# for (i in 1:5) {
-# out <-
-#   foreach (
-    # i = 1:5,
-   #  i = 1:length(datasets),
-   # .inorder = FALSE) %dopar% {
-   # .inorder = FALSE) %do% {
-             
-    set.seed(i)
-  
- #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- # Placed here to enable parallelization       
- #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   # select the models which are to be fit
-   holling.like.models <- c(
-     "Holling.I"
-     ,
-     "Holling.II"
-     ,
-     "Holling.n"
-   )
+  # for (i in 1:5) {
 
-  # Utility functions 
-  source('lib/bootstrap_data.R')
-  source('lib/plot_coefs.R')
-  source('lib/resid_metrics.R')
-  source('lib/set_params.R')
-  # may throw ignorable warning and takes a while to load because of C++ compiling
-  source('lib/holling_method_one_predator_one_prey.R')
- #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
-    
   # grab all of dataset's information
   dataset <- datasets[[i]]
   
@@ -85,7 +61,7 @@ for (i in 1:length(datasets)) {
   
   datasetID <- this.study$datasetID
   datasetName <- this.study$datasetName
- 
+  
   #############################################
   # fit all the functional response models
   #############################################
@@ -104,9 +80,11 @@ for (i in 1:length(datasets)) {
   
   # Do data need to be bootstrapped?
   if("Nconsumed.mean" %in% colnames(d)){
-    boot.reps <- 5
+    parametric <- TRUE
+    boot.reps <- boot.reps.parm
   } else{
-    boot.reps <- 1
+    parametric <- FALSE
+    boot.reps <- boot.reps.nonparm
   }
   
   # create a progress bar that shows how far along the fitting is
@@ -124,15 +102,15 @@ for (i in 1:length(datasets)) {
     while (bad.fit) {
       # generate bootstrapped data if necessary
       if (boot.reps > 1) {
-        d <- bootstrap.data(d.orig, this.study$replacement)
+        d <- bootstrap.data(d.orig, this.study$replacement, parametric)
       }
       
       # attempt to fit all models and catch an error if any fit fails
       success <- try({
         for (modeltype in c(holling.like.models)) {
-            # attempt to fit the model; abort and re-bootstrap if the fit fails
-              bootstrap.fits[[modeltype]][[b]] <-
-                fit.holling.like(d, this.study, modeltype)
+          # attempt to fit the model; abort and re-bootstrap if the fit fails
+          bootstrap.fits[[modeltype]][[b]] <-
+            fit.holling.like(d, this.study, modeltype)
         }
       })
       
@@ -146,59 +124,59 @@ for (i in 1:length(datasets)) {
   close(pb)
   
   for (modeltype in c(holling.like.models)) {
-      # create container for the parameter estimates
-        # ~~~~~~~~~~~~~~~~~~~~
-        # Summarize bootstraps
-        # ~~~~~~~~~~~~~~~~~~~~
-        # scrape out the parameter estimates
-        local.boots <-
-          make.array(bootstrap.fits[[modeltype]][[1]], boot.reps)
-        for (b in 1:boot.reps) {
-          local.boots[, , b] <- mytidy(bootstrap.fits[[modeltype]][[b]])
-        }
-        
-        # get out the estimates into their own object
-        local.ests <-
-          as.array(apply(local.boots, c(1, 2), summarize.boots))
-        
-        # create container for the logLik of the fits
-        local.lls <-
-          summarize.boots(sapply(bootstrap.fits[[modeltype]], logLik))
-        
-        # create container for the AIC of the fits
-        local.AICs <-
-          summarize.boots(sapply(bootstrap.fits[[modeltype]], AIC))
-        
-        # create container for the AICc of the fits
-        local.AICcs <-
-          summarize.boots(sapply(bootstrap.fits[[modeltype]], AICc))
-        
-        # create container for the BIC of the fits
-        local.BICs <-
-          summarize.boots(sapply(bootstrap.fits[[modeltype]], BIC))
-        
-        # create container for the RMSD of the fits
-        local.RMSDs <-
-          summarize.boots(sapply(bootstrap.fits[[modeltype]], 
-                                 resid.metric, metric = 'RMSD'))
-
-        # create container for the MAD of the fits
-        local.MADs <-
-          summarize.boots(sapply(bootstrap.fits[[modeltype]], 
-                                 resid.metric, metric = 'MAD'))
-        
-        # save the key stuff (including the first fit)
-        bootstrap.fits[[modeltype]] <- list(
-          fit = bootstrap.fits[[modeltype]][[1]],
-          boots = local.boots,
-          ests = local.ests,
-          lls = local.lls,
-          AICs = local.AICs,
-          AICcs = local.AICcs,
-          BICs = local.BICs,
-          RMSDs = local.RMSDs,
-          MADs = local.MADs
-        )
+    # create container for the parameter estimates
+    # ~~~~~~~~~~~~~~~~~~~~
+    # Summarize bootstraps
+    # ~~~~~~~~~~~~~~~~~~~~
+    # scrape out the parameter estimates
+    local.boots <-
+      make.array(bootstrap.fits[[modeltype]][[1]], boot.reps)
+    for (b in 1:boot.reps) {
+      local.boots[, , b] <- mytidy(bootstrap.fits[[modeltype]][[b]])
+    }
+    
+    # get out the estimates into their own object
+    local.ests <-
+      as.array(apply(local.boots, c(1, 2), summarize.boots))
+    
+    # create container for the logLik of the fits
+    local.lls <-
+      summarize.boots(sapply(bootstrap.fits[[modeltype]], logLik))
+    
+    # create container for the AIC of the fits
+    local.AICs <-
+      summarize.boots(sapply(bootstrap.fits[[modeltype]], AIC))
+    
+    # create container for the AICc of the fits
+    local.AICcs <-
+      summarize.boots(sapply(bootstrap.fits[[modeltype]], AICc))
+    
+    # create container for the BIC of the fits
+    local.BICs <-
+      summarize.boots(sapply(bootstrap.fits[[modeltype]], BIC))
+    
+    # create container for the RMSD of the fits
+    local.RMSDs <-
+      summarize.boots(sapply(bootstrap.fits[[modeltype]], 
+                             resid.metric, metric = 'RMSD'))
+    
+    # create container for the MAD of the fits
+    local.MADs <-
+      summarize.boots(sapply(bootstrap.fits[[modeltype]], 
+                             resid.metric, metric = 'MAD'))
+    
+    # save the key stuff (including the first fit)
+    bootstrap.fits[[modeltype]] <- list(
+      fit = bootstrap.fits[[modeltype]][[1]],
+      boots = local.boots,
+      ests = local.ests,
+      lls = local.lls,
+      AICs = local.AICs,
+      AICcs = local.AICcs,
+      BICs = local.BICs,
+      RMSDs = local.RMSDs,
+      MADs = local.MADs
+    )
   }
   
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -230,13 +208,13 @@ for (i in 1:length(datasets)) {
             '.Rdata'
           ))
   
-    # close open streams, etc
-    if (sinkMessages) {
-      sink(type = "message")
-      close(Mesgs)
-      options(warn = 0)
-      readLines(errLog)
-
+  # close open streams, etc
+  if (sinkMessages) {
+    sink(type = "message")
+    close(Mesgs)
+    options(warn = 0)
+    readLines(errLog)
+    
     # Remove empty error logs
     docs <-
       list.files('../../temp/ErrorLogs/',
@@ -245,12 +223,7 @@ for (i in 1:length(datasets)) {
     file.remove(docs[file.size(docs) == 0])
   }
 }
-
-if(parallel){
-  parallel::stopCluster(cl)
-  showConnections()
-  # closeAllConnections()
-}
+closeAllConnections()
 ###########################################################################
 ###########################################################################
 ###########################################################################
