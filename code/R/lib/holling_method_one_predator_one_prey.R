@@ -220,12 +220,13 @@ fit.holling.like <- function(
 	modeltype,
 	nloptr.control=list(),
 	mle2.control=list(),
+	skip.hessian = FALSE,
 	...
 ){
 
 	# estimate starting value from the data using linear regression
 	start <- list(
-		attack = log(coef(lm(d$Nconsumed~0+I(d$Npredator * d$Nprey * d$Time))))
+		attack = log(coef(lm(d$Nconsumed~ 0+ I(d$Npredator * d$Nprey * d$Time))))
 	)
 
 	# fit Holling Type I via MLE with above starting parameter value
@@ -259,6 +260,7 @@ fit.holling.like <- function(
 		),
 		vecpar = TRUE,
 		control = mle2.control,
+		skip.hessian = skip.hessian,
 		...
 	)
 
@@ -302,7 +304,8 @@ fit.holling.like <- function(
 				modeltype = "Holling.II"
 			),
 			vecpar = TRUE,
-			control = mle2.control
+			control = mle2.control,
+			skip.hessian = skip.hessian
 		)
 
 		if(modeltype == "Holling.II"){
@@ -347,7 +350,8 @@ fit.holling.like <- function(
 					modeltype = modeltype
 				),
 				vecpar = TRUE,
-				control = mle2.control
+				control = mle2.control,
+				skip.hessian = skip.hessian
 			)
 
 			# convert mle2 estimation to list of starting values
@@ -370,7 +374,8 @@ fit.holling.like <- function(
 					modeltype = modeltype
 				),
 				vecpar = TRUE,
-				control = mle2.control
+				control = mle2.control,
+				skip.hessian = skip.hessian
 			)
 
 			# add the first set of starting values as these can help when profiling
