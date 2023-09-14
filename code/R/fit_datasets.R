@@ -1,7 +1,10 @@
-rm(list = ls())
+# rm(list = ls())
+
+# Is this going to run on the HPC in parallel?
+OnArray <- FALSE
 
 # set to FALSE if you want to watch messages in real time 
-#  or TRUE to have them silently saved to file instead.
+# or TRUE to have them silently saved to file instead.
 sinkMessages <- TRUE
 
 # Clear prior fits and errors logs
@@ -10,18 +13,19 @@ ClearAll <- TRUE
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # select the models which are to be fit
 holling.like.models <- c(
-  "Holling.I"
-  ,
-  "Holling.II"
-  ,
+  "Holling.I",
+  "Holling.II",
   "Holling.n"
 )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# How many times to bootstrap each dataset
-# for mean (parametric) and raw (non-parametric) datasets
+# How many times to bootstrap each dataset?
+# Given no solution to Holling.n model, we need to perform integration 
+# for non-replacement studies (which takes a very long time).  
+# We therefore bootstrap less often for these.
 
-boot.reps.parm <- boot.reps.nonparm <- 100
+boot.reps.replacement <- 10
+boot.reps.nonreplacement <- 10
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(ClearAll){
@@ -42,15 +46,25 @@ source('data_subset.R')
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Pull out datasets we want to analyze
 load('../../data/datasets.Rdata')
-datasets <- subset_data(datasets, exportSummaries = TRUE)
+datasets <- subset_data(datasets, exportSummaries = !OnArray)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Let's start analyzing!
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if(OnArray){
+  ArrayArgs <- commandArgs()
+  iStart <- as.integer(ArrayArgs[4])
+  iEnd <- as.integer(ArrayArgs[5])
+} else{
+  iStart <- 1
+  iEnd <- length(datasets)
+}
+
+
 # # fit everything on a dataset-by-dataset basis
-for (i in 1:length(datasets)) {
+for (i in iStart:iEnd) {
   # for (i in 1:5) {
 
   # grab all of dataset's information
@@ -79,13 +93,22 @@ for (i in 1:length(datasets)) {
   d.orig <- d <- dataset$data
   
   # Do data need to be bootstrapped?
+  # Yes, we now bootstrap for all datasets but distinguish between 
+  # parametric (for mean +/- SE studies) and non-parametric (raw data)
   if("Nconsumed.mean" %in% colnames(d)){
     parametric <- TRUE
-    boot.reps <- boot.reps.parm
   } else{
     parametric <- FALSE
-    boot.reps <- boot.reps.nonparm
   }
+  
+  # How many times should we bootstrap?
+  if(this.study$replacement){
+    boot.reps <- boot.reps.replacement
+  } else{
+    boot.reps <- boot.reps.nonreplacement
+  }
+  
+  skip.hessian <- ifelse(boot.reps == 1, FALSE, TRUE)
   
   # create a progress bar that shows how far along the fitting is
   print(paste0(i, ' of ', length(datasets), ': ', datasetName))
@@ -102,7 +125,9 @@ for (i in 1:length(datasets)) {
     while (bad.fit) {
       # generate bootstrapped data if necessary
       if (boot.reps > 1) {
-        d <- bootstrap.data(d.orig, this.study$replacement, parametric)
+        d <- bootstrap.data(d.orig, 
+                            this.study$replacement, 
+                            parametric)
       }
       
       # attempt to fit all models and catch an error if any fit fails
@@ -110,7 +135,10 @@ for (i in 1:length(datasets)) {
         for (modeltype in c(holling.like.models)) {
           # attempt to fit the model; abort and re-bootstrap if the fit fails
           bootstrap.fits[[modeltype]][[b]] <-
-            fit.holling.like(d, this.study, modeltype)
+            fit.holling.like(d, 
+                             this.study, 
+                             modeltype, 
+                             skip.hessian = skip.hessian)
         }
       })
       
@@ -223,7 +251,13 @@ for (i in 1:length(datasets)) {
     file.remove(docs[file.size(docs) == 0])
   }
 }
-closeAllConnections()
+
+# ~~~~~~~~~~~~~~~~~~~~~
+if(OnArray){
+  q()
+} else{
+  closeAllConnections()
+}
 ###########################################################################
 ###########################################################################
 ###########################################################################
