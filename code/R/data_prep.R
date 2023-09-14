@@ -35,13 +35,13 @@ sel <- forage$Data.set == 2584
 forage$X2D.density.units[sel] <- 'cm2'
 
 sel <- forage$Data.set == 98 & forage$Original.x == 10 &  forage$Original.y > 70
-forage$Original.y[sel] <- 3
+forage$Original.y[sel] <- 7
 
 sel <- forage$Data.set == 296 & forage$Original.y == 15.75
 forage$Original.y[sel] <- 0.75
 
 sel <- forage$Data.set == 335 & forage$Original.x == 19
-forage$Original.x[sel] <- 49
+forage <- forage[!sel, ]
 
 sel <- forage$Data.set %in% 2235:2238
 forage$Trial.duration..h.[sel] <- 24
@@ -55,17 +55,8 @@ forage$Original.y[sel] <- forage$Original.y[sel] / 10
 sel <- forage$Data.set == 2091 & forage$Original.x == 128 &  forage$Original.y == 399
 forage$Original.y[sel] <- 39
 
-sel <- forage$Data.set == 2283 & forage$Original.x == 563
-forage$Original.y[sel] <- forage$Original.y[sel] / 10
-
-sel <- forage$Data.set == 2363 & forage$Original.x == 10
-forage$Original.y[sel] <- forage$Original.y[sel] / 10
-
-sel <- forage$Data.set == 1645 & forage$Original.x == 2259
-forage$Original.y[sel] <- forage$Original.y[sel] / 10
-
-sel <- forage$Data.set == 1439 & forage$Original.x == 5 & forage$Original.y == 0.000057
-forage$Original.y[sel] <- forage$Original.y[sel] * 1000
+sel <- forage$Data.set == 1439
+forage$Original.y[sel] <- round(forage$Original.y[sel], 3)
 
 sel <- forage$Data.set == 1794
 forage$Original.y[sel] <- round(forage$Original.y[sel], 2)
@@ -82,6 +73,8 @@ forage$Original.y[sel] <- round(forage$Original.y[sel], 2)
 sel <- forage$Data.set %in% 2704:2706
 forage$Original.y[sel] <- round(forage$Original.y[sel], 2)
 
+sel <- forage$Data.set == 1633 & is.na(forage$Original.error)
+forage$Original.error[sel] <- 20.2 # assume minimum of given values
 
 # ~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~
@@ -250,11 +243,12 @@ forage$PreyEaten.SE[sel] <- forage$Original.error[sel] /
 sel <- forage$Rate.is=='mean' & forage$Original.error.units=='Range'
 forage$PreyEaten.SE[sel] <- forage$Original.error[sel] / 2 # As assumed by DeLong & Uiterwaal
 
-# If no error or no sample size are given for mean studies
+# If no error is given for mean study, treat as raw data study
 sel <- forage$Rate.is == 'mean' & is.na(forage$Original.error) | 
   forage$Rate.is == 'mean' & forage$Original.error == ''
-forage$Original.error[sel] <- 0
+forage$Rate.is[sel] <- 'raw data'
 
+# If not sample size is given for mean study, assume one
 sel <- forage$Rate.is == 'mean' & is.na(forage$Sample.size..per.density.) | 
   forage$Rate.is == 'mean' & forage$Sample.size..per.density. == ''
 forage$Sample.size..per.density.[sel] <- 3 # As assumed by DeLong & Uiterwaal
@@ -438,10 +432,10 @@ forage$PreyEaten.units[sel] <- gsub('per 0.5', '', forage$PreyEaten.units[sel] )
 forage$PreyAvail[sel] <- forage$PreyAvail[sel] * 20
 forage$PreyAvail.units[sel] <- gsub('per ml', '', forage$PreyAvail.units[sel] )
 
-# study <- 'Bryan et al 1995'
-# sel <- grep(study, forage$Source)
-# forage$Trial.duration..h.[sel] <- (30/60)/60
-# forage$PreyEaten.units[sel] <- gsub('per 30 sec', '', forage$PreyEaten.units[sel] )
+study <- 'Bryan et al 1995'
+sel <- grep(study, forage$Source)
+forage$Trial.duration..h.[sel] <- (30/60)/60
+forage$PreyEaten.units[sel] <- gsub('per 30 sec', '', forage$PreyEaten.units[sel] )
 # 
 # study <- 'Sandheinrich and Atchison 1989'
 # sel <- grepl(study, forage$Source) & grepl('per 30 sec', forage$PreyEaten.units)
@@ -705,9 +699,11 @@ for (i in 1:length(datasetIDs)) {
   temp.study <- subset(forage, forage$Data.set == datasetIDs[i])
   temp.info <- subset(forage_meta, forage_meta$Data.set == datasetIDs[i])
   
+  datasetName = paste(datasetIDs[i], unique(temp.study$AuthorYear), sep='-')
+  
   study.info <- list(
     datasetID = datasetIDs[i],
-    datasetName = paste(datasetIDs[i], unique(temp.study$AuthorYear), sep='-'),
+    datasetName = datasetName,
     source = unique(temp.study$Source),
     pred = unique(temp.study$Predator),
     prey = unique(temp.study$Prey),
@@ -738,7 +734,8 @@ for (i in 1:length(datasetIDs)) {
   )
   
   if (any(lapply(study.info, length) > 1)) {
-    stop(paste('Dataset ', datasetIDs[i], ' has at least one non-unique attribute.'))
+    stop(paste('Dataset ', datasetName, 
+               ' has at least one non-unique attribute.'))
     print(study.info)
   }
   
