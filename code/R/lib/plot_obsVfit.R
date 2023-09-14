@@ -37,7 +37,6 @@ plot_obsVfit <- function(ffr.fit,
   }
   
   if (!is.null(ffr.fit$study.info$data.Nconsumed.se)) {
-    # can't use bootstrap to specify since some bootstrapped data don't have SE values and were hence treated as data.
     eaten <- ffr.fit$study.info$data.Nconsumed.mean
     eaten.se <- ffr.fit$study.info$data.Nconsumed.se
   } else{
@@ -61,6 +60,10 @@ plot_obsVfit <- function(ffr.fit,
       modeltype = model,
       replacement = replacement
     )
+    
+    # In rare cases the data are so poor / the fit is so bad for the Holling.n
+    # that NaN are produced.  Zap these.
+    Nconsumed.predicted[is.na(Nconsumed.predicted)] <- 0
 
   rmsd <- ffr.fit$RMSD[[model]]['mean']
   
@@ -70,9 +73,10 @@ plot_obsVfit <- function(ffr.fit,
   par(pty = 's')  
   if(!curve){
     rng <- range(c(eaten, Nconsumed.predicted))
-    if(ffr.fit$estimates[[model]]["n",1,1][1] > 1){
+    if (!is.null(ffr.fit$study.info$data.Nconsumed.se)) {
       rng <- range(c(rng, eaten - eaten.se, eaten + eaten.se))      
     }
+    
     plot(
       eaten,
       Nconsumed.predicted,
@@ -82,18 +86,22 @@ plot_obsVfit <- function(ffr.fit,
       xlab = 'Observed',
       type = 'n'
     )
-    if(ffr.fit$estimates[[model]]["n",1,1][1] > 1){
-      arrows(
-        eaten - eaten.se,
-        Nconsumed.predicted,
-        eaten + eaten.se,
-        Nconsumed.predicted,
-        angle = 90,
-        length = 0.02,
-        code = 3
+    
+    if (!is.null(ffr.fit$study.info$data.Nconsumed.se)) {
+      suppressWarnings(
+        arrows(
+          eaten - eaten.se,
+          Nconsumed.predicted,
+          eaten + eaten.se,
+          Nconsumed.predicted,
+          angle = 90,
+          length = 0.02,
+          code = 3
+        )
       )
     }
     abline(0, 1, lty = 2)
+    
     points(eaten, 
            Nconsumed.predicted, 
            pch = 19)
@@ -120,11 +128,18 @@ plot_obsVfit <- function(ffr.fit,
       modeltype = model,
       replacement = replacement
     )
+    
+    # In rare cases the data are so poor / the fit is so bad for the Holling.n
+    # that NaN are produced.  Zap these.
+    Nconsumed.predicted[is.na(Nconsumed.predicted)] <- 0
+    
     xrng <- range(0, initial)
     yrng <- range(c(0, eaten, Nconsumed.predicted))
-    if(ffr.fit$estimates[[model]]["n",1,1][1] > 1){
+    
+    if (!is.null(ffr.fit$study.info$data.Nconsumed.se)) {
       yrng <- range(c(yrng, eaten - eaten.se, eaten + eaten.se))      
     }
+    
     plot(initial,
          eaten,
          xlim = xrng,
@@ -133,17 +148,21 @@ plot_obsVfit <- function(ffr.fit,
          ylab = 'Eaten',
          type = 'n'
         )
-    if(ffr.fit$estimates[[model]]["n",1,1][1] > 1){
-      arrows(
-        initial, 
-        eaten - eaten.se,
-        initial,
-        eaten + eaten.se,
-        angle = 90,
-        length = 0.02,
-        code = 3
+    
+    if (!is.null(ffr.fit$study.info$data.Nconsumed.se)) {
+      suppressWarnings(
+        arrows(
+          initial, 
+          eaten - eaten.se,
+          initial,
+          eaten + eaten.se,
+          angle = 90,
+          length = 0.02,
+          code = 3
+        )
       )
     }
+    
     points(c(initial), 
            c(eaten), 
            pch = 19)
