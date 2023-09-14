@@ -37,7 +37,6 @@ profile_coefs <- function(
   
   if(printWarnings){options(warn=1)}else{options(warn=0)}
     
-    profiles <- list()
     for(i in 1:length(ffr.fits)){
 
       x <- ffr.fits[[i]]
@@ -173,19 +172,14 @@ profile_coefs <- function(
       cf <- as.data.frame(cbind(lb,est,ub))
       rownames(cf) <- pars
 
-      profiles[[i]] <- list(
-        study.info = x$study.info,
-        model = model,
-        estimates = x$estimates[model],
-        profile=list(
-          cf = cf,
-          method = method,
-          point.est = point.est
-        )
+      ffr.fits[[i]]$profile <- list(
+        cf = cf,
+        method = method,
+        point.est = point.est
       )
       pb$tick()
     }
 
   options(warn=0)
-  return(profiles)
+  return(ffr.fits)
 }
