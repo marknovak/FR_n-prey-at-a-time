@@ -1,5 +1,8 @@
 # Given a specified model and an ordered vector of parameter values to be passed to the likelihood function, assign the parameter values to the appropriate parameter names.
+
 # Note: Most parameter values are exponentiated (to avoid negative values during fitting).
+# Note: 'n' is 0 (rather than 1) for Holling.I and II due to structure of model
+#       (see "holling_method_one_predator_one_prey.R")
 
 set_params<-function(params,
                      model=c('Holling.I',
@@ -17,12 +20,12 @@ set_params<-function(params,
   if(model == "Holling.I"){
     assign('attack',       exp(params[1]), envir = .GlobalEnv)
     assign('handling',     0, envir = .GlobalEnv)
-    assign('n',            1, envir = .GlobalEnv)
+    assign('n',            0, envir = .GlobalEnv)
     
   } else  if(model == "Holling.II"){
       assign('attack',       exp(params[1]), envir = .GlobalEnv)
       assign('handling',     exp(params[2]), envir = .GlobalEnv)
-      assign('n',            1, envir = .GlobalEnv)
+      assign('n',            0, envir = .GlobalEnv)
       
   } else  if(model == "Holling.n"){
     assign('attack',       exp(params[1]), envir = .GlobalEnv)
