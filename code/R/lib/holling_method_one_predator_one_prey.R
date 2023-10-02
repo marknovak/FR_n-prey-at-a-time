@@ -165,7 +165,10 @@ holling.like.1pred.1prey.NLL = function(params,
                                         killed,
                                         predators,
                                         replacement,
-                                        time=NULL){
+                                        time=NULL,
+                                        penalized.nll = TRUE,
+                                        lambda = 1/log(40)
+                                        ){
 
 	# expected number consumed given data and parameters
 	Nconsumed <- holling.like.1pred.1prey.predict(
@@ -192,14 +195,25 @@ holling.like.1pred.1prey.NLL = function(params,
 			if(is.nan(nll)){
 			  nll <- Inf
 			}
-			return(nll)
+			# return(nll)
 		}
 
 		# negative log likelihood based on total number consumed (replacement)
 		if(replacement){
 			nll <- -sum(dpois(killed, Nconsumed, log=TRUE))
-			return(nll)
+			# return(nll)
 		}
+	  
+	  if(penalized.nll){
+	    # Penalize the nll by the value of 'n' (recalling that, given the structure
+	    # of the parameterized n-prey model, we must add 1 to n to get "true" n)
+	    # A lambda of 1/3 roughly corresponds to a value of n = 20 counting as 1/2
+	    # a unit of log-likelihood
+	    set_params(params, modeltype)
+	    nll <- nll + lambda * log(1 + n)
+	  }
+	  
+	  return(nll)
 	}
 
 	stop()
@@ -314,8 +328,8 @@ fit.holling.like <- function(
 			if(modeltype == "Holling.n"){
 				start <- list(
 					attack = coef(hollingII.via.mle2)["attack"],
-					handling = log(1),
-					n = log(1)
+					handling = coef(hollingII.via.mle2)["handling"],
+					n = log(1) # given structural parameterization as 1+n
 				)
 			}
 
