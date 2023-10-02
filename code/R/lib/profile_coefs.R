@@ -2,7 +2,7 @@
 # useful for an implementation to get SEs from non-positive-definite Hessians
 library(HelpersMG)
 
-# Function to performing interval profiling on estimated model coefficients for subsequent plotting. Intervals are determined on estimated scale and must be backtransformed to plot on natural scale.  Script applying function it to all datasets follows.
+# Function to performing interval profiling on estimated model coefficients for subsequent plotting. Intervals are determined on estimated scale and must be backtransformed to plot on natural scale.
 profile_coefs <- function(
   ffr.fits,
   model=c('Holling.I',

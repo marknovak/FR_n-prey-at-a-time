@@ -67,6 +67,7 @@ plot.coefs <- function(ffr.fits = NULL,
                        color.vector = NULL,
                        pch.factor = c('None', 'Parasite', 'Replacement'),
                        pch.vector = NULL,
+                       bg.vector = NULL,
                        labels = NULL,
                        ...) {
   if (plot.SEs & is.null(ffr.fits[[1]]$profile)) {
@@ -79,6 +80,7 @@ plot.coefs <- function(ffr.fits = NULL,
   color.vector <- color.vector
   pch.factor <- match.arg(pch.factor)
   pch.vector <- pch.vector
+  bg.vector <- bg.vector
   point.est <- match.arg(point.est)
   point.est <- ifelse(point.est == 'median', '50%', point.est)
 
@@ -93,8 +95,11 @@ plot.coefs <- function(ffr.fits = NULL,
     log = 'x'
     axis.link = function(x){log(x, base = log.axis.base)}
     axis.unlink = function(x){log.axis.base^x}
-    print('ok')
   }
+  
+  # if(is.null(labels)){
+  #   labels <- rep('', length(ffr.fits))
+  # }
   
   # scaffold of a plot that doesn't actually show anything
   plot(
@@ -110,15 +115,17 @@ plot.coefs <- function(ffr.fits = NULL,
   )
   
   # tick marks and labels to indicate different data sets
-  axis(
-    side = 2,
-    at = 1:length(ffr.fits),
-    labels = labels,
-    cex.axis = 0.45,
-    las = 1,
-    lwd = 0,
-    lwd.ticks = 1
-  )
+  if(!is.null(labels)){
+    axis(
+      side = 2,
+      at = 1:length(ffr.fits),
+      labels = labels,
+      cex.axis = 0.45,
+      las = 1,
+      lwd = 0,
+      lwd.ticks = 1
+    )
+  }
   
   if(is.null(log.axis.base)){
     axis(
@@ -183,6 +190,7 @@ plot.coefs <- function(ffr.fits = NULL,
     if (length(pch.vector) == length(ffr.fits)) {
       # note that this overrides pch.factor
       pch <- pch.vector[i]
+      bg <- bg.vector[i]
     }
     
     # extract point estimate (the median estimate is easy to determine regardless of the type of data so should be default)
@@ -424,8 +432,5 @@ plot.coefs <- function(ffr.fits = NULL,
       )
     }
     par(xpd = FALSE)
-    
-    
-    
   }
 }

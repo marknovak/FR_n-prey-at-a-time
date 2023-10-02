@@ -61,10 +61,6 @@ plot_obsVfit <- function(ffr.fit,
       replacement = replacement
     )
     
-    # In rare cases the data are so poor / the fit is so bad for the Holling.n
-    # that NaN are produced.  Zap these.
-    Nconsumed.predicted[is.na(Nconsumed.predicted)] <- 0
-
   rmsd <- ffr.fit$RMSD[[model]]['mean']
   
   # extract LL from (last) fit
@@ -129,9 +125,9 @@ plot_obsVfit <- function(ffr.fit,
       replacement = replacement
     )
     
-    # In rare cases the data are so poor / the fit is so bad for the Holling.n
-    # that NaN are produced.  Zap these.
-    Nconsumed.predicted[is.na(Nconsumed.predicted)] <- 0
+    # # In rare cases the data are so poor / the fit is so bad for the Holling.n
+    # # that NaN are produced.  Zap these.
+    # Nconsumed.predicted[is.na(Nconsumed.predicted)] <- 0
     
     xrng <- range(0, initial)
     yrng <- range(c(0, eaten, Nconsumed.predicted))

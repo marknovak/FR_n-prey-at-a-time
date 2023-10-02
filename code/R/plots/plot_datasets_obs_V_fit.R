@@ -48,44 +48,47 @@ for (i in 1:length(ffr.fits)) {
     mtext(
       bquote(LL ==
                .(round(
-                 ffr.fits[[i]]$LL[[models[m]]]['50%'], 1
-               ))
+                 ffr.fits[[i]]$LL[[models[m]]]['mean'], 1 ))
              ~ "(" * .(round(
-               ffr.fits[[i]]$LL[[models[m]]]['16%'], 1
-             ))
+               ffr.fits[[i]]$LL[[models[m]]]['16%'], 1 ))
              * "," ~ .(round(
-               ffr.fits[[i]]$LL[[models[m]]]['84%'], 1
-             )) * ")"),
+               ffr.fits[[i]]$LL[[models[m]]]['84%'], 1 )) * ")"),
       side = 3,
-      line = 3,
+      line = 1,
+      cex = 0.5
+    )
+    mtext(
+      bquote(BIC ==
+               .(round(
+                 ffr.fits[[i]]$BIC[[models[m]]]['mean'], 1 ))
+             ~ "(" * .(round(
+               ffr.fits[[i]]$BIC[[models[m]]]['16%'], 1 ))
+             * "," ~ .(round(
+               ffr.fits[[i]]$BIC[[models[m]]]['84%'], 1 )) * ")"),
+      side = 3,
+      line = 2,
       cex = 0.5
     )
     mtext(
       bquote(AICc ==
                .(round(
-                 ffr.fits[[i]]$AICc[[models[m]]]['50%'], 1
-               ))
+                 ffr.fits[[i]]$AICc[[models[m]]]['mean'], 1 ))
              ~ "(" * .(round(
-               ffr.fits[[i]]$AICc[[models[m]]]['16%'], 1
-             ))
+               ffr.fits[[i]]$AICc[[models[m]]]['16%'], 1 ))
              * "," ~ .(round(
-               ffr.fits[[i]]$AICc[[models[m]]]['84%'], 1
-             )) * ")"),
+               ffr.fits[[i]]$AICc[[models[m]]]['84%'], 1 )) * ")"),
       side = 3,
-      line = 5,
+      line = 3,
       cex = 0.5
     )
     try(mtext(
       bquote(AIC ==
                .(round(
-                 ffr.fits[[i]]$AIC[[models[m]]]['50%'], 1
-               ))
+                 ffr.fits[[i]]$AIC[[models[m]]]['mean'], 1 ))
              ~ "(" * .(round(
-               ffr.fits[[i]]$AIC[[models[m]]]['16%'], 1
-             ))
+               ffr.fits[[i]]$AIC[[models[m]]]['16%'], 1 ))
              * "," ~ .(round(
-               ffr.fits[[i]]$AIC[[models[m]]]['84%'], 1
-             )) * ")"),
+               ffr.fits[[i]]$AIC[[models[m]]]['84%'], 1 )) * ")"),
       side = 3,
       line = 4,
       cex = 0.5
