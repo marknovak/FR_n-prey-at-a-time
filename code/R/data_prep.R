@@ -76,6 +76,9 @@ forage$Original.y[sel] <- round(forage$Original.y[sel], 2)
 sel <- forage$Data.set == 1633 & is.na(forage$Original.error)
 forage$Original.error[sel] <- 20.2 # assume minimum of given values
 
+sel <- forage$Data.set == 2174 & forage$Original.x == 969
+forage$Original.x[sel] = 96
+
 # ~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~
 # Shorter study name
