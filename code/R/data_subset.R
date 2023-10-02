@@ -45,7 +45,7 @@ subset_data <- function(datasets, exportSummaries = FALSE,
   
   insufficient.trtmts <- 
     unlist(lapply(datasets, function(x){
-      length(unique(x$data$Nprey)) <  3 } ))
+      length(unique(x$data$Nprey)) <  4 } ))
   
   mass.study <-
     unlist(lapply(datasets, function(x){
@@ -76,7 +76,7 @@ subset_data <- function(datasets, exportSummaries = FALSE,
     !non.integer.eaten &
     !non.numeric.predators &
     !insufficient.trtmts &
-    !mass.study &
+    # !mass.study &
     !skip.datasets
   # ----------------------------------   #  
 
