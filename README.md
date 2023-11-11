@@ -1,0 +1,2 @@
+
+Warnings: Unlike in the original analyses (e.g., Uiterwaal & DeLong XXX) , the present analyses have _not_ standardized prey and predator abundances by area (or volume) and have _not_ standardized prey consumption values by time.  Therefore, estimates of the attack rates and handling times are study-specific and cannot be compared across all studies.  Estimates of the number of prey eaten at a time (parameter _n_ of the _n_-prey-at-a-time functional response model) are unit-less and hence are unaffected by the lack of standardization.
