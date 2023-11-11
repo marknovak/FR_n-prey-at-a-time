@@ -67,6 +67,7 @@ plot.coefs <- function(ffr.fits = NULL,
                        color.vector = NULL,
                        pch.factor = c('None', 'Parasite', 'Replacement'),
                        pch.vector = NULL,
+                       pch.cex = 0.5,
                        bg.vector = NULL,
                        labels = NULL,
                        ...) {
@@ -80,6 +81,7 @@ plot.coefs <- function(ffr.fits = NULL,
   color.vector <- color.vector
   pch.factor <- match.arg(pch.factor)
   pch.vector <- pch.vector
+  pch.cex <- pch.cex
   bg.vector <- bg.vector
   point.est <- match.arg(point.est)
   point.est <- ifelse(point.est == 'median', '50%', point.est)
@@ -412,6 +414,7 @@ plot.coefs <- function(ffr.fits = NULL,
         x = mm.link,
         col = col,
         pch = pch,
+        cex = pch.cex,
         bg = bg
       )
     } else if (mm.link > xlim[2]) {
@@ -420,6 +423,7 @@ plot.coefs <- function(ffr.fits = NULL,
         x = par("usr")[2],
         col = col,
         pch = pch,
+        cex = pch.cex,
         bg = bg
       )
     } else{
@@ -428,6 +432,7 @@ plot.coefs <- function(ffr.fits = NULL,
         x = par("usr")[1],
         col = col,
         pch = pch,
+        cex = pch.cex,
         bg = bg
       )
     }

@@ -24,8 +24,8 @@ holling.like.models <- c(
 # for non-replacement studies (which takes a very long time).  
 # We therefore bootstrap less often for these.
 
-boot.reps.replacement <- 10
-boot.reps.nonreplacement <- 10
+boot.reps.replacement <- 1000
+boot.reps.nonreplacement <- 100
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(ClearAll){
@@ -47,6 +47,11 @@ source('data_subset.R')
 # Pull out datasets we want to analyze
 load('../../data/datasets.Rdata')
 datasets <- subset_data(datasets, exportSummaries = !OnArray)
+
+# reorder them by sample size
+ss <- order(unlist(lapply(datasets, function(x){
+    x$study.info$sample.size } )), decreasing = TRUE)
+datasets <- datasets[ss]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

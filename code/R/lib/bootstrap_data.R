@@ -178,7 +178,7 @@ summarize.boots <- function(x) {
   c(
     mean = mean(x, na.rm = TRUE),
     quantile(x, c(0.025, 0.16, 0.5, 0.84, 0.975), na.rm = TRUE),
-    n = sum(!is.na(x))
+    n = sum(is.finite(x))
   )
 }
 

@@ -12,7 +12,11 @@ subset_data <- function(datasets, exportSummaries = FALSE,
   datasetNames <- unlist(lapply(datasets, function(x){ x$study.info$datasetName} )) 
   
   # insert datasetIDs to skip specific datasets
-  skip.datasets <- c()
+  skip.datasets <- c(672, # Tully et al 2005 varied (unknown) arena sizes
+                     1693, # Vucetich et al 2002 predator numbers vary in unknown way
+                     2379:2385,  # Reeve 1963 variable (unknown) volumes
+                     785:791 ) # Båmstedt 1990 variable durations and predator numbers
+  
   skip.datasets <- datasetIDs %in% skip.datasets
   
   replacement.study <- 
@@ -22,18 +26,6 @@ subset_data <- function(datasets, exportSummaries = FALSE,
   non.numeric.predators <- 
     unlist(lapply(datasets, function(x){
       any(is.na(x$data$Npredator) | x$data$Npredator == '') } ))
-  
-  # more.eaten.than.given <- 
-  #   !replacement.study & 
-  #   !non.numeric.predators &
-  #   unlist(lapply(datasets, function(x){
-  #     any(x$data[, grep('Nconsumed', colnames(x$data))[1]] > x$data$Nprey) }))
-  # 
-  # more.eaten.than.given.num <- 
-  #   unlist(lapply(datasets[more.eaten.than.given], function(x){
-  #     paste(
-  #       sum(x$data[, grep('Nconsumed', colnames(x$data))[1]] > x$data$Nprey),
-  #       'of', nrow(x$data))}))
   
   more.eaten.than.given <-
     unlist(lapply(datasets, function(x){
@@ -46,6 +38,18 @@ subset_data <- function(datasets, exportSummaries = FALSE,
   insufficient.trtmts <- 
     unlist(lapply(datasets, function(x){
       length(unique(x$data$Nprey)) <  4 } ))
+  
+  insufficient.trtmts.num <- 
+    unlist(lapply(datasets, function(x){
+      length(unique(x$data$Nprey)) } ))
+  
+  insufficient.reps <- 
+    unlist(lapply(datasets, function(x){
+      x$study.info$sample.size <  15 } ))
+  
+  insufficient.reps.num <- 
+    unlist(lapply(datasets, function(x){
+      x$study.info$sample.size } ))
   
   mass.study <-
     unlist(lapply(datasets, function(x){
@@ -70,12 +74,12 @@ subset_data <- function(datasets, exportSummaries = FALSE,
   
   # ----->  EDIT HERE AS DESIRED  <------ #
   keep <- 
-    replacement.study &
-    # !more.eaten.than.given &
+    # replacement.study &
     !non.integer.prey &
     !non.integer.eaten &
     !non.numeric.predators &
     !insufficient.trtmts &
+    !insufficient.reps &
     # !mass.study &
     !skip.datasets
   # ----------------------------------   #  
@@ -101,9 +105,14 @@ subset_data <- function(datasets, exportSummaries = FALSE,
     write.table( datasetNames[non.numeric.predators],
                  paste0(dir, 'NonNumericPredators.txt'),
                  row.names = FALSE)
-    write.table( datasetNames[insufficient.trtmts],
-                paste0(dir, 'InsufficientTreatments.txt'),
-                row.names = FALSE)
+    write.table( cbind(datasetNames[insufficient.reps], 
+                       insufficient.reps.num[insufficient.reps]), 
+                 paste0(dir, 'InsufficientReplicates.txt'),
+                 row.names = FALSE)
+    write.table( cbind(datasetNames[insufficient.trtmts], 
+                       insufficient.trtmts.num[insufficient.trtmts]), 
+                 paste0(dir, 'InsufficientTreatments.txt'),
+                 row.names = FALSE)
     write.table( datasetNames[mass.study],
                  paste0(dir, 'MassStudy.txt'),
                  row.names = FALSE)

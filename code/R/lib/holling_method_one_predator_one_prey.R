@@ -166,7 +166,7 @@ holling.like.1pred.1prey.NLL = function(params,
                                         predators,
                                         replacement,
                                         time=NULL,
-                                        penalized.nll = TRUE,
+                                        penalized.nll = FALSE,
                                         lambda = 1/log(40)
                                         ){
 
