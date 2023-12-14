@@ -260,14 +260,66 @@ covars$max.Nprey <-  unlist(lapply(ffr.fits, function(x){
                               max(x$study.info$data.Nprey)} ))
 
 
+dat <- data.frame(ests, covars)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# cumulative distribution of n estimates ----
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cumdens <- ecdf(log2(dat$parm.n))
+
+cairo_pdf(paste0(figdir, 'Hn_n-ecdf.pdf'), height = 3, width = 4.25)
+par(
+  mar = c(3, 3, 1, 1),
+  mgp = c(1.5, 0.2, 0),
+  tcl = -0.1,
+  las = 1,
+  cex = 0.7,
+  yaxs = 'i')
+
+  plot(cumdens,
+       col.01line = NA,
+       axes = FALSE,
+       main = '',
+       xlab = expression(paste('Prey at a time ', (italic(n)))),
+       ylab = expression(paste('Probability ', P(italic(X) <= italic(n)))),
+       ylim = c(0.5, 1.05),
+       verticals = TRUE,
+       do.points = FALSE
+  )
+  xat <- 0:10
+  axis(1, at = xat, labels = 2^xat)
+  axis(2)
+  box(lwd = 1)
+  xat <- c(2, 4, 8, 16, 32)
+  segments(log2(xat), 0, log2(xat), cumdens(log2(xat)),
+           col = 'grey80',
+           lty = 2)
+  segments(-10, cumdens(log2(xat)), log2(xat), cumdens(log2(xat)),
+           col = 'grey80',
+           lty = 2)
+  legend(
+    'bottomright', 
+    ncol = 2L,
+    inset = 0.01,
+    legend = c(expression(italic(n)), 
+               xat, 
+               expression(P(italic(X) <= italic(n))),
+               round(cumdens(log2(xat)), 3))
+  )
+dev.off()
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # n vs. pred-prey body-mass ratio ----
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-dat <- data.frame(ests, covars)
-dat$log10.ppmr <- log10(dat$pred.prey.mass.ratio)
-dat$log10.n <- log10(dat$parm.n)
+
+base.ppmr <- 10
+base.n <- 2
+dat$log.ppmr <- log(dat$pred.prey.mass.ratio, base.ppmr)
+dat$log.n <- log(dat$parm.n, base.n)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Subset to datasets having both pred & prey body mass values
 
@@ -287,25 +339,27 @@ par(
        pch = 21,
        bg = 'grey',
        xlab = 'Predator:Prey body mass ratio',
-       ylab = expression('Prey at-a-time ' (italic(n))),
+       ylab = expression('Prey at a time ' (italic(n))),
        axes = FALSE)
-  eaxis(1, at = 10^seq(-2,14,2))
-  eaxis(2, use.expr = FALSE)
+  eaxis(1, at = base.ppmr^seq(-2,14,2))
+  eaxis(2, at = base.n^seq(-2, 10), 
+        labels = base.n^seq(-2, 10), 
+        use.expr = FALSE)
 
-  fit <- lm(log10.n ~ log10.ppmr, 
+  fit <- lm(log.n ~ log.ppmr, 
             data = dat[sel,])
   summary(fit)
   fit.all <- fit
   
-  xrng <- range(dat$log10.ppmr[sel])
-  dts <- data.frame(log10.ppmr = seq(xrng[1], xrng[2], length = 100) )
+  xrng <- range(dat$log.ppmr[sel])
+  dts <- data.frame(log.ppmr = seq(xrng[1], xrng[2], length = 100) )
   dts$pred <- predict(fit, newdata = dts)
-  lines(10^(dts$log10.ppmr), 
-        10^(dts$pred), 
+  lines(base.ppmr^(dts$log.ppmr), 
+        base.n^(dts$pred), 
         col = 'black',
         lwd = 3)
-  lines(10^(dts$log10.ppmr), 
-        10^(dts$pred), 
+  lines(base.ppmr^(dts$log.ppmr), 
+        base.n^(dts$pred), 
         col = 'blue',
         lwd = 2)
 
@@ -313,20 +367,20 @@ par(
   # Subset further to estimates of n > 1
   sel <- is.finite(dat$pred.prey.mass.ratio) & round(dat$parm.n) > 1
 
-  fit <- lm(log10.n ~ log10.ppmr, 
+  fit <- lm(log.n ~ log.ppmr, 
             data = dat[sel,])
   summary(fit)
   fit.ng1 <- fit
   
-  xrng <- range(dat$log10.ppmr[sel])
-  dts <- data.frame(log10.ppmr = seq(xrng[1], xrng[2], length = 100) )
+  xrng <- range(dat$log.ppmr[sel])
+  dts <- data.frame(log.ppmr = seq(xrng[1], xrng[2], length = 100) )
   dts$pred <- predict(fit, newdata = dts)
-  lines(10^(dts$log10.ppmr), 
-        10^(dts$pred), 
+  lines(base.ppmr^(dts$log.ppmr), 
+        base.n^(dts$pred), 
         col = 'black',
         lwd = 3)
-  lines(10^(dts$log10.ppmr), 
-        10^(dts$pred), 
+  lines(base.ppmr^(dts$log.ppmr), 
+        base.n^(dts$pred), 
         col = 'red',
         lwd = 2)
   
@@ -364,8 +418,8 @@ focal.preds.cols <- brewer.pal(length(focal.preds), 'Accent')
 sel <- is.finite(dat$pred.prey.mass.ratio) &
         dat$pred.major.group %in% focal.preds
 
-fit <- lm(log10.n ~
-            log10.ppmr * factor(pred.major.group, levels = focal.preds),
+fit <- lm(log.n ~
+            log.ppmr * factor(pred.major.group, levels = focal.preds),
           data = dat[sel,])
 summary(fit)
 fit.foc.preds <- fit
@@ -387,10 +441,12 @@ par(
        col = alpha('grey10', 0.3),
        bg = alpha('grey', 0.3),
        xlab = 'Predator:Prey body mass ratio',
-       ylab = expression('Prey at-a-time ' (italic(n))),
+       ylab = expression('Prey at a time ' (italic(n))),
        axes = FALSE)
-  eaxis(1, at = 10^seq(-2,14,2))
-  eaxis(2, use.expr = FALSE)
+  eaxis(1, at = base.ppmr^seq(-2,14,2))
+  eaxis(2, at = base.n^seq(-2, 10), 
+        labels = base.n^seq(-2, 10), 
+        use.expr = FALSE)
   
   for (p in 1:length(focal.preds)){
     focal.pred <-   focal.preds[p]
@@ -405,16 +461,16 @@ par(
     focal.pred <-   focal.preds[p]
     sel <- is.finite(dat$pred.prey.mass.ratio) &
       dat$pred.major.group %in% focal.pred
-    xrng <- range(dat$log10.ppmr[sel])
-    dts <- data.frame(log10.ppmr = seq(xrng[1], xrng[2], length = 100) )
+    xrng <- range(dat$log.ppmr[sel])
+    dts <- data.frame(log.ppmr = seq(xrng[1], xrng[2], length = 100) )
     dts$pred.major.group <- focal.pred
     dts$pred <- predict(fit, newdata = dts)
-    lines(10^(dts$log10.ppmr), 
-          10^(dts$pred), 
+    lines(base.ppmr^(dts$log.ppmr), 
+          base.n^(dts$pred), 
           col = 'black',
           lwd = 3)
-    lines(10^(dts$log10.ppmr), 
-          10^(dts$pred), 
+    lines(base.ppmr^(dts$log.ppmr), 
+          base.n^(dts$pred), 
           col = focal.preds.cols[p],
           lwd = 2)
   }
@@ -463,10 +519,12 @@ par(
        col = alpha('grey10', 0.2),
        bg = alpha('grey', 0.2),
        xlab = 'Predator:Prey body mass ratio',
-       ylab = expression('Prey at-a-time ' (italic(n))),
+       ylab = expression('Prey at a time ' (italic(n))),
        axes = FALSE)
-  eaxis(1, at = 10^seq(-2,14,2))
-  eaxis(2, use.expr = FALSE)
+  eaxis(1, at = base^seq(-2,14,2))
+  eaxis(2, at = base.n^seq(-2, 10), 
+        labels = base.n^seq(-2, 10), 
+        use.expr = FALSE)
   
   sel <- is.finite(dat$pred.prey.mass.ratio) &
       dat$sample.size > 50
@@ -475,20 +533,20 @@ par(
            pch = 21,
            bg = 'grey')
   
-  fit <- lm(log10.n ~ log10.ppmr, 
+  fit <- lm(log.n ~ log.ppmr, 
             data = dat[sel,])
   fit.SS50 <- fit
   
-    xrng <- range(dat$log10.ppmr[sel])
-    dts <- data.frame(log10.ppmr = seq(xrng[1], xrng[2], length = 100) )
+    xrng <- range(dat$log.ppmr[sel])
+    dts <- data.frame(log.ppmr = seq(xrng[1], xrng[2], length = 100) )
     dts$pred.major.group <- focal.pred
     dts$pred <- predict(fit, newdata = dts)
-    lines(10^(dts$log10.ppmr), 
-          10^(dts$pred), 
+    lines(base.ppmr^(dts$log.ppmr), 
+          base.n^(dts$pred), 
           col = 'black',
           lwd = 3)
-    lines(10^(dts$log10.ppmr), 
-          10^(dts$pred), 
+    lines(base.ppmr^(dts$log.ppmr), 
+          base.n^(dts$pred), 
           col = 'grey',
           lwd = 2)
   
@@ -498,20 +556,22 @@ dev.off()
 ###############################################################################
 # Export summary tables
 # ~~~~~~~~~~~~~~~~~~~~~~~~
+covarlab <- paste0('$log_{', base.ppmr, '}$(PPMR)')
 
 stargazer(fit.all, fit.ng1,
           column.labels = c('n $\\geq$ 1','n \\textgreater 1'),
-          dep.var.caption = 'Model',
+          dep.var.caption = 'Subset',
           dep.var.labels = '',#'Prey at-a-time (n)',
           dep.var.labels.include = FALSE,
           intercept.bottom = FALSE,
           model.numbers = FALSE,
           covariate.labels = c('Intercept',
-                               '$log_{10}$(PPMR)'),
+                               covarlab),
           ci = TRUE, ci.level = 0.95, 
           single.row = TRUE,
           align = FALSE,
           notes.label = '',
+          label = 'tab:n-ppmr',
           title = "Results",
           # float.env = "sidewaystable",
           out = paste0(tabledir,'Hn_n-ppmr.tex')
@@ -523,13 +583,14 @@ stargazer(fit.foc.preds,
           dep.var.labels.include = FALSE,
           intercept.bottom = FALSE,
           covariate.labels = c(paste0('Intercept (', focal.preds[1], ')'),
-                                '$log_{10}$(PPMR)',
+                                covarlab,
                                 focal.preds[-1],
                                 paste0('$log_{10}$(PPMR):',focal.preds[-1])),
           ci = TRUE, ci.level = 0.95, 
           single.row = TRUE,
           align = FALSE,
           notes.label = '',
+          label = 'tab:n-ppmr_byPreds',
           title = "Results",
           # float.env = "sidewaystable",
           out = paste0(tabledir,'Hn_n-ppmr_byPred.tex')
@@ -541,11 +602,12 @@ stargazer(fit.SS50,
           dep.var.labels.include = FALSE,
           intercept.bottom = FALSE,
           covariate.labels = c('Intercept',
-                               '$log_{10}$(PPMR)'),
+                               covarlab),
           ci = TRUE, ci.level = 0.95, 
           single.row = TRUE,
           align = FALSE,
           notes.label = '',
+          label = 'tab:n-ppmr_ssg50',
           title = "Results",
           # float.env = "sidewaystable",
           out = paste0(tabledir,'Hn_n-ppmr_SSg50.tex')
