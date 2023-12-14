@@ -65,7 +65,7 @@ forage$Foraging.rate <- as.numeric(forage$Foraging.rate)
 # Dataset-specific typo fixes & digitalization precision errors ----
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-forage[sel, ]
+# forage[sel, ]
 
 sel <- forage$Data.set == 2887 & forage$Original.x == 10
 forage$Original.y[sel] <- 89
@@ -250,6 +250,10 @@ sel <- forage$Data.set %in% 1973:1978
 forage$Original.x[sel] <- round(forage$Original.x[sel], 1)
 forage$Original.y[sel] <- round(forage$Original.y[sel], 1)
 
+
+# sel <- forage$Data.set %in% 990
+
+
 # ~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~
 # Shorter study name
@@ -278,7 +282,7 @@ forage$X3D.Arena..units <- trimws(forage$X3D.Arena..units)
 
 
 # Inspect arena unit combinations
-unique(forage[, c('X2D.Arena..units', 'X3D.Arena..units')])
+# unique(forage[, c('X2D.Arena..units', 'X3D.Arena..units')])
 
 
 # Create new x and y on which to affect changes
@@ -287,7 +291,7 @@ forage$PreyEaten <- forage$Original.y
 
 
 # Standardize units of prey available
-sort(unique(forage[, c('Original.x.units')]))
+# sort(unique(forage[, c('Original.x.units')]))
 forage$PreyAvail.units <- tolower(forage$Original.x.units)
 
 forage$PreyAvail.units <- gsub('per per', 'prey per', 
@@ -522,9 +526,9 @@ forage <- forage[sel,]
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sel2 <- grepl('proportion', forage$PreyEaten.units)
-forage[sel2,
-       c('Data.set','Source','PreyAvail','PreyEaten','PreyEaten.SE',
-         'PreyEaten.units', 'Rate.is')]
+# forage[sel2,
+#        c('Data.set','Source','PreyAvail','PreyEaten','PreyEaten.SE',
+#          'PreyEaten.units', 'Rate.is')]
 
 # assume these are actually counts (have already been converted)
 sel <- forage$Data.set %in% c(1634:1639)
@@ -880,11 +884,41 @@ forage$PreyAvail[sel] <- round(forage$PreyAvail[sel] * 100)
 forage$PreyAvail.units[sel] <- gsub('per ml', '', forage$PreyAvail.units[sel] )
 forage$Trial.duration..h.[sel] <- 1
 
+study <- 'Persson and Greenberg 1990'
+sel <- grep(study, forage$Source)
+forage$PreyAvail[sel] <- round(forage$PreyAvail[sel] * 198)
+forage$PreyAvail.units[sel] <- gsub('per l', '', forage$PreyAvail.units[sel] )
+forage$PreyEaten[sel] <- forage$PreyEaten[sel] * 60
+forage$PreyEaten.SE[sel] <- forage$PreyEaten.SE[sel] * 60
+forage$PreyEaten.units[sel] <- gsub('per sec', '', forage$PreyEaten.units[sel] )
+forage$Trial.duration..h.[sel] <- 1
 
+study <- 'Persson 1986'
+sel <- grep(study, forage$Source)
+forage$PreyAvail[sel] <- round(forage$PreyAvail[sel] * 200)
+forage$PreyAvail.units[sel] <- gsub('per l', '', forage$PreyAvail.units[sel] )
+forage$PreyEaten[sel] <- forage$PreyEaten[sel] * 60
+forage$PreyEaten.SE[sel] <- forage$PreyEaten.SE[sel] * 60
+forage$PreyEaten.units[sel] <- gsub('per sec', '', forage$PreyEaten.units[sel] )
+forage$Trial.duration..h.[sel] <- 1
+
+study <- 'Bergman 1987'
+# sel <- grep(study, forage$Source)
+sel <- forage$Data.set %in% 1500:1509
+forage$PreyAvail[sel] <- forage$PreyAvail[sel] * 90
+forage$PreyAvail.units[sel] <- gsub('per l', '', forage$PreyAvail.units[sel] )
+forage$PreyEaten[sel] <- round(forage$PreyEaten[sel] * 20, 2)
+forage$PreyEaten.SE[sel] <- round(forage$PreyEaten.SE[sel] * 20, 2)
+forage$PreyEaten.units[sel] <- gsub('per sec', '', forage$PreyEaten.units[sel] )
+forage$Trial.duration..h.[sel] <- 1
+
+# sel <- grep(study, forage$Source)
+# sel <- forage$Data.set %in% 1500
 # forage[sel,]
 # unique(forage[sel,]$Data.set)
 # unique(forage[sel,]$Source)
 # forage[sel,]$PreyAvail - forage[sel,]$PreyEaten
+# plot(forage[sel,]$PreyAvail, forage[sel,]$PreyEaten)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

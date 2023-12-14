@@ -15,7 +15,12 @@ subset_data <- function(datasets, exportSummaries = FALSE,
   skip.datasets <- c(672, # Tully et al 2005 varied (unknown) arena sizes
                      1693, # Vucetich et al 2002 predator numbers vary in unknown way
                      2379:2385,  # Reeve 1963 variable (unknown) volumes
-                     785:791 ) # Båmstedt 1990 variable durations and predator numbers
+                     785:791, # Båmstedt 1990 variable durations and predator numbers
+                     990, # Dinis et al 2016  *
+                     1907 # Korstad et al 1989 *
+                     ) 
+  
+# * Unable to fit due to absence of low prey abundance variation.  Potentially also due to complete depletion of prey at low abundances.
   
   skip.datasets <- datasetIDs %in% skip.datasets
   

@@ -9,9 +9,8 @@
 
 
 packages <- 
-  c('foreach',
-    'doParallel',
-    'bbmle',
+  c(
+   'bbmle',
     'nloptr',
     'lamW',
     'shape',
