@@ -1,11 +1,15 @@
 # rm(list = ls())
 
-# Is this going to run on the HPC in parallel?
-OnArray <- FALSE
+# Is this going to run on the
+#  College of Science's or the College of Engineering's HPC (or neither)?
+OnCoSArray <- FALSE
+OnCoEArray <- FALSE
+
+OnArray <- OnCoSArray | OnCoEArray
 
 # set to FALSE if you want to watch messages in real time 
 # or TRUE to have them silently saved to file instead.
-sinkMessages <- TRUE
+sinkMessages <- !OnArray
 
 # Clear prior fits and errors logs
 ClearAll <- TRUE
@@ -24,8 +28,8 @@ holling.like.models <- c(
 # for non-replacement studies (which takes a very long time).  
 # We therefore bootstrap less often for these.
 
-boot.reps.replacement <- 1000
-boot.reps.nonreplacement <- 100
+boot.reps.replacement <- 2
+boot.reps.nonreplacement <- 2
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(ClearAll){
@@ -49,9 +53,9 @@ load('../../data/datasets.Rdata')
 datasets <- subset_data(datasets, exportSummaries = !OnArray)
 
 # reorder them by sample size
-ss <- order(unlist(lapply(datasets, function(x){
-    x$study.info$sample.size } )), decreasing = TRUE)
-datasets <- datasets[ss]
+# ss <- order(unlist(lapply(datasets, function(x){
+#     x$study.info$sample.size } )), decreasing = TRUE)
+# datasets <- datasets[ss]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,17 +63,29 @@ datasets <- datasets[ss]
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(OnArray){
-  ArrayArgs <- commandArgs()
-  iStart <- as.integer(ArrayArgs[4])
-  iEnd <- as.integer(ArrayArgs[5])
+  if(OnCoSArray){ # Pass both start and end
+    ArrayArgs <- commandArgs()
+    iStart <- as.integer(ArrayArgs[4])
+    iEnd <- as.integer(ArrayArgs[5])
+  }
+  if(OnCoEArray){
+    ArrayArgs <- commandArgs() # Pass only start
+    taskID <- as.integer(ArrayArgs[4])
+    iStart <- (task_id - 1) * 10 + 1 
+    iEnd <- min(iStart + 10, length(datasets)) # ten at a time
+  }
 } else{
   iStart <- 1
   iEnd <- length(datasets)
 }
 
+# selDatasets <- 
+#   which(unlist(lapply(datasets, function(x){
+#     x$study.info$datasetID } )) %in% c(1500:1509))
 
 # # fit everything on a dataset-by-dataset basis
 for (i in iStart:iEnd) {
+  # for (i in selDatasets){
   # for (i in 1:5) {
 
   # grab all of dataset's information
