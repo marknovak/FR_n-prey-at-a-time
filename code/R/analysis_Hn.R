@@ -58,7 +58,7 @@ ffr.fits <- ffr.fits[fit.order]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Repeat following seperately for replacement and non-replacement studies
+# Repeat following separately for replacement and non-replacement studies
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 replacement <-
@@ -67,13 +67,18 @@ replacement <-
 
 ffr.fits.orig <- ffr.fits
 
-for (repl in c('Repl', 'nonRepl')){
+for (repl in c('Repl', 'nonRepl', 'All')){
 
   if(repl == 'Repl'){ 
     ffr.fits <- ffr.fits.orig[which(replacement)] 
     xlims <- c(0.9, 150)
-  }else{
+  }
+  if(repl == 'Repl'){
     ffr.fits <- ffr.fits.orig[which(!replacement)]
+    xlims <- c(0.9, 300)
+  }
+  if(repl == 'All'){
+    ffr.fits <- ffr.fits.orig
     xlims <- c(0.9, 300)
   }
   
@@ -338,7 +343,7 @@ par(
        log = 'xy',
        pch = 21,
        bg = 'grey',
-       xlab = 'Predator:Prey body mass ratio',
+       xlab = 'Predator-prey body-mass ratio',
        ylab = expression('Prey at a time ' (italic(n))),
        axes = FALSE)
   eaxis(1, at = base.ppmr^seq(-2,14,2))
@@ -412,6 +417,8 @@ dev.off()
 
 pmg <- table(dat$pred.major.group)
 pmg <- pmg[order(pmg, decreasing = TRUE)]
+cumsum(pmg)/sum(pmg)
+
 focal.preds <- names(pmg[which(pmg > 100)])
 focal.preds.cols <- brewer.pal(length(focal.preds), 'Accent')
 
@@ -440,7 +447,7 @@ par(
        pch = 21,
        col = alpha('grey10', 0.3),
        bg = alpha('grey', 0.3),
-       xlab = 'Predator:Prey body mass ratio',
+       xlab = 'Predator-prey body-mass ratio',
        ylab = expression('Prey at a time ' (italic(n))),
        axes = FALSE)
   eaxis(1, at = base.ppmr^seq(-2,14,2))
@@ -503,7 +510,7 @@ dev.off()
 # n vs. body size (high sample size studies only)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-cairo_pdf(paste0(figdir, 'Hn_n-ppmr_SSg50.pdf'), height = 2.5, width = 3.25)
+cairo_pdf(paste0(figdir, 'Hn_n-ppmr_SSgMed.pdf'), height = 2.5, width = 3.25)
 par(
   mar = c(3, 3, 1, 1),
   mgp = c(1.5, 0.2, 0),
@@ -518,7 +525,7 @@ par(
        pch = 21,
        col = alpha('grey10', 0.2),
        bg = alpha('grey', 0.2),
-       xlab = 'Predator:Prey body mass ratio',
+       xlab = 'Predator-prey body-mass ratio',
        ylab = expression('Prey at a time ' (italic(n))),
        axes = FALSE)
   eaxis(1, at = base^seq(-2,14,2))
@@ -526,8 +533,10 @@ par(
         labels = base.n^seq(-2, 10), 
         use.expr = FALSE)
   
+  
+  med <- median(dat$sample.size)
   sel <- is.finite(dat$pred.prey.mass.ratio) &
-      dat$sample.size > 50
+      dat$sample.size > med
   points(dat$pred.prey.mass.ratio[sel],
            dat$parm.n[sel],
            pch = 21,
@@ -535,7 +544,7 @@ par(
   
   fit <- lm(log.n ~ log.ppmr, 
             data = dat[sel,])
-  fit.SS50 <- fit
+  fit.SSMed <- fit
   
     xrng <- range(dat$log.ppmr[sel])
     dts <- data.frame(log.ppmr = seq(xrng[1], xrng[2], length = 100) )
@@ -559,8 +568,8 @@ dev.off()
 covarlab <- paste0('$log_{', base.ppmr, '}$(PPMR)')
 
 stargazer(fit.all, fit.ng1,
-          column.labels = c('n $\\geq$ 1','n \\textgreater 1'),
-          dep.var.caption = 'Subset',
+          column.labels = c('$n \\geq$ 1','$n$ \\textgreater 1'),
+          dep.var.caption = 'Estimates',
           dep.var.labels = '',#'Prey at-a-time (n)',
           dep.var.labels.include = FALSE,
           intercept.bottom = FALSE,
@@ -572,7 +581,7 @@ stargazer(fit.all, fit.ng1,
           align = FALSE,
           notes.label = '',
           label = 'tab:n-ppmr',
-          title = "Results",
+          title = paste0("Summary statistics (with 95\\% confidence intervals) for the least-squares linear regressions of $log_2(n)$ on ", covarlab, " when considering all studies ($n \\geq$ 1) or only those studies for which $n$ \\textgreater 1."),
           # float.env = "sidewaystable",
           out = paste0(tabledir,'Hn_n-ppmr.tex')
           )
@@ -590,14 +599,14 @@ stargazer(fit.foc.preds,
           single.row = TRUE,
           align = FALSE,
           notes.label = '',
-          label = 'tab:n-ppmr_byPreds',
-          title = "Results",
+          label = 'tab:n-ppmr_byPred',
+          title = paste0("Summary statistics (with 95\\% confidence intervals) for the multiple least-squares linear regression of $log_2(n)$ on ", covarlab, " $\\times$ predator group for the four most common predator taxonomic groups."),
           # float.env = "sidewaystable",
           out = paste0(tabledir,'Hn_n-ppmr_byPred.tex')
 )
 
-stargazer(fit.SS50,
-          dep.var.caption = 'Sample size \\textgreater 50',
+stargazer(fit.SSMed,
+          dep.var.caption = paste0('Sample size \\textgreater ', med),
           dep.var.labels = '',#'Prey at-a-time (n)',
           dep.var.labels.include = FALSE,
           intercept.bottom = FALSE,
@@ -607,11 +616,50 @@ stargazer(fit.SS50,
           single.row = TRUE,
           align = FALSE,
           notes.label = '',
-          label = 'tab:n-ppmr_ssg50',
-          title = "Results",
+          label = 'tab:n-ppmr_ssgMed',
+          title = paste0("Summary statistics (with 95\\% confidence intervals) for the least-squares linear regression of $log_2(n)$ on ", covarlab, " when considering only those studies having a sample size greater than the median sample size of all studies."),
           # float.env = "sidewaystable",
-          out = paste0(tabledir,'Hn_n-ppmr_SSg50.tex')
+          out = paste0(tabledir,'Hn_n-ppmr_SSgMed.tex')
 )
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Venn diagrams by predator group
+# ~~~~~~~~~~~~
+
+for (p in 1:length(focal.preds)){
+temp.evidence.IC <- evidence.IC[covars$pred.major.group == focal.preds[p],]
+  venn.diagram(
+    x = lapply(as.list(temp.evidence.IC), function(x){(1:nrow(temp.evidence.IC))[x]}),
+    category.names = c("Type I " , "Type II" , "n-prey"),
+    filename = paste0(figdir, 'Hn_venn_', focal.preds[p], '.png'),
+    output = FALSE,
+    
+    # Output features
+    imagetype="png" ,
+    height = 800 , 
+    width = 800 , 
+    resolution = 400,
+    disable.logging = TRUE,
+    margin = 0.02,
+    
+    # Circles
+    lwd = 0.1,
+    lty = 1,
+    fill = brewer.pal(3, "Pastel2"),
+    
+    # Numbers
+    cex = 0.6,
+    fontface = "bold",
+    fontfamily = "sans",
+    
+    # Set names
+    cat.cex = 0.6,
+    cat.fontface = "bold",
+    cat.default.pos = "outer",
+    cat.pos = c(0, 0, 180),
+    cat.fontfamily = "sans"
+  )
+}
 
 ###############################################################################
 ###############################################################################
