@@ -15,7 +15,8 @@ packages <-
     'lamW',
     'shape',
     'HelpersMG',
-    'odeintr'
+    'odeintr',
+    'progress'
   )
     
   install.packages(packages, dependencies = TRUE)
