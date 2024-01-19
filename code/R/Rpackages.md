@@ -16,7 +16,8 @@ packages <-
     'shape',
     'HelpersMG',
     'odeintr',
-    'progress'
+    'progress',
+    'stargazer'
   )
     
   install.packages(packages, dependencies = TRUE)

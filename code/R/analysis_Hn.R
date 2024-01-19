@@ -92,7 +92,7 @@ for (repl in c('Repl', 'nonRepl', 'All')){
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   IC <- 'BIC'
   
-  ICs<-data.frame(t(sapply(ffr.fits, function(x) {
+  ICs <- data.frame(t(sapply(ffr.fits, function(x) {
     unlist(data.frame(
       Holling.I  = x[[IC]][['Holling.I']]['mean'],
       Holling.II = x[[IC]][['Holling.II']]['mean'],
@@ -165,7 +165,7 @@ for (repl in c('Repl', 'nonRepl', 'All')){
   color.vector <- ifelse(replacement, 'grey50', 'grey70')
   bg.vector <- ifelse(replacement, 'grey70', 'grey80')
   
-  cairo_pdf(paste0(figdir, 'Hn_n-', repl,'.pdf'), height = 6, width = 4)
+pdf(paste0(figdir, 'Hn_n-', repl,'.pdf'), height = 6, width = 4)
   par(
     mar = c(3, 1, 1, 1),
     mgp = c(1.5, 0.1, 0),
@@ -203,10 +203,9 @@ for (repl in c('Repl', 'nonRepl', 'All')){
 
 } # <-- end of loop through replacement vs. non-replacement studies
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Analyses of 'n' estimates ----
+# Pull together estimates and covariates ----
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -267,6 +266,65 @@ covars$max.Nprey <-  unlist(lapply(ffr.fits, function(x){
 
 dat <- data.frame(ests, covars)
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Venn diagrams by predator group
+# ~~~~~~~~~~~~
+pmg <- table(dat$pred.major.group)
+pmg <- pmg[order(pmg, decreasing = TRUE)]
+cumsum(pmg)/sum(pmg)
+
+focal.preds <- names(pmg[which(pmg > 100)])
+focal.preds.cols <- brewer.pal(length(focal.preds), 'Accent')
+
+for (p in 1:length(focal.preds)){
+temp.evidence.IC <- evidence.IC[covars$pred.major.group == focal.preds[p],]
+  venn.diagram(
+    x = lapply(as.list(temp.evidence.IC), function(x){(1:nrow(temp.evidence.IC))[x]}),
+    category.names = c("Type I " , "Type II" , "n-prey"),
+    filename = paste0(figdir, 'Hn_venn_', focal.preds[p], '.png'),
+    output = FALSE,
+    
+    # Output features
+    imagetype="png" ,
+    height = 800 , 
+    width = 800 , 
+    resolution = 400,
+    disable.logging = TRUE,
+    margin = 0.02,
+    
+    # Circles
+    lwd = 0.1,
+    lty = 1,
+    fill = brewer.pal(3, "Pastel2"),
+    
+    # Numbers
+    cex = 0.6,
+    fontface = "bold",
+    fontfamily = "sans",
+    
+    # Set names
+    cat.cex = 0.6,
+    cat.fontface = "bold",
+    cat.default.pos = "outer",
+    cat.pos = c(0, 0, 180),
+    cat.fontfamily = "sans"
+  )
+}
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Analyses of 'n' estimates ----
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Remove studies that were deemed to be Type I only
+# (We can use evidence.IC since 'All' is the last subset run above)
+T1 <- evidence.IC$Holling.I & apply(evidence.IC, 1, sum) == 1
+# evidence.IC[T1,]
+
+dat <- dat[!T1,]
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # cumulative distribution of n estimates ----
@@ -274,7 +332,7 @@ dat <- data.frame(ests, covars)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 cumdens <- ecdf(log2(dat$parm.n))
 
-cairo_pdf(paste0(figdir, 'Hn_n-ecdf.pdf'), height = 3, width = 4.25)
+pdf(paste0(figdir, 'Hn_n-ecdf.pdf'), height = 3, width = 4.25)
 par(
   mar = c(3, 3, 1, 1),
   mgp = c(1.5, 0.2, 0),
@@ -330,7 +388,7 @@ dat$log.n <- log(dat$parm.n, base.n)
 
 sel <- is.finite(dat$pred.prey.mass.ratio)
 
-cairo_pdf(paste0(figdir, 'Hn_n-ppmr.pdf'), height = 2.5, width = 3.25)
+pdf(paste0(figdir, 'Hn_n-ppmr.pdf'), height = 2.5, width = 3.25)
 par(
   mar = c(3, 3, 1, 1),
   mgp = c(1.5, 0.2, 0),
@@ -414,14 +472,6 @@ dev.off()
 # n vs. body size by predator identity
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-pmg <- table(dat$pred.major.group)
-pmg <- pmg[order(pmg, decreasing = TRUE)]
-cumsum(pmg)/sum(pmg)
-
-focal.preds <- names(pmg[which(pmg > 100)])
-focal.preds.cols <- brewer.pal(length(focal.preds), 'Accent')
-
 sel <- is.finite(dat$pred.prey.mass.ratio) &
         dat$pred.major.group %in% focal.preds
 
@@ -432,7 +482,7 @@ summary(fit)
 fit.foc.preds <- fit
 
 
-cairo_pdf(paste0(figdir, 'Hn_n-ppmr_byPred.pdf'), height = 2.5, width = 3.25)
+pdf(paste0(figdir, 'Hn_n-ppmr_byPred.pdf'), height = 2.5, width = 3.25)
 par(
   mar = c(3, 3, 1, 1),
   mgp = c(1.5, 0.2, 0),
@@ -510,7 +560,7 @@ dev.off()
 # n vs. body size (high sample size studies only)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-cairo_pdf(paste0(figdir, 'Hn_n-ppmr_SSgMed.pdf'), height = 2.5, width = 3.25)
+pdf(paste0(figdir, 'Hn_n-ppmr_SSgMed.pdf'), height = 2.5, width = 3.25)
 par(
   mar = c(3, 3, 1, 1),
   mgp = c(1.5, 0.2, 0),
@@ -528,7 +578,7 @@ par(
        xlab = 'Predator-prey body-mass ratio',
        ylab = expression('Prey at a time ' (italic(n))),
        axes = FALSE)
-  eaxis(1, at = base^seq(-2,14,2))
+  eaxis(1, at = base.ppmr^seq(-2,14,2))
   eaxis(2, at = base.n^seq(-2, 10), 
         labels = base.n^seq(-2, 10), 
         use.expr = FALSE)
@@ -622,44 +672,6 @@ stargazer(fit.SSMed,
           out = paste0(tabledir,'Hn_n-ppmr_SSgMed.tex')
 )
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Venn diagrams by predator group
-# ~~~~~~~~~~~~
-
-for (p in 1:length(focal.preds)){
-temp.evidence.IC <- evidence.IC[covars$pred.major.group == focal.preds[p],]
-  venn.diagram(
-    x = lapply(as.list(temp.evidence.IC), function(x){(1:nrow(temp.evidence.IC))[x]}),
-    category.names = c("Type I " , "Type II" , "n-prey"),
-    filename = paste0(figdir, 'Hn_venn_', focal.preds[p], '.png'),
-    output = FALSE,
-    
-    # Output features
-    imagetype="png" ,
-    height = 800 , 
-    width = 800 , 
-    resolution = 400,
-    disable.logging = TRUE,
-    margin = 0.02,
-    
-    # Circles
-    lwd = 0.1,
-    lty = 1,
-    fill = brewer.pal(3, "Pastel2"),
-    
-    # Numbers
-    cex = 0.6,
-    fontface = "bold",
-    fontfamily = "sans",
-    
-    # Set names
-    cat.cex = 0.6,
-    cat.fontface = "bold",
-    cat.default.pos = "outer",
-    cat.pos = c(0, 0, 180),
-    cat.fontfamily = "sans"
-  )
-}
 
 ###############################################################################
 ###############################################################################
