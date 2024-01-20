@@ -73,7 +73,7 @@ for (repl in c('Repl', 'nonRepl', 'All')){
     ffr.fits <- ffr.fits.orig[which(replacement)] 
     xlims <- c(0.9, 150)
   }
-  if(repl == 'Repl'){
+  if(repl == 'nonRepl'){
     ffr.fits <- ffr.fits.orig[which(!replacement)]
     xlims <- c(0.9, 300)
   }
