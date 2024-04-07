@@ -28,8 +28,8 @@ holling.like.models <- c(
 # for non-replacement studies (which takes a very long time).  
 # We therefore bootstrap less often for these.
 
-boot.reps.replacement <- 2
-boot.reps.nonreplacement <- 2
+boot.reps.replacement <- 1000
+boot.reps.nonreplacement <- 100
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(ClearAll){
@@ -48,8 +48,19 @@ source('lib/holling_method_one_predator_one_prey.R')
 source('data_subset.R')
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Pull out datasets we want to analyze
+# Load compilation and count unique consumer-resource pairs
 load('../../data/datasets.Rdata')
+
+length(datasets)
+nrow(
+  unique(
+  cbind(
+  unlist(lapply(datasets, function(x){ x$study.info$pred } )),
+  unlist(lapply(datasets, function(x){ x$study.info$prey } )))
+  ))
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Pull out datasets we want to analyze
 datasets <- subset_data(datasets, exportSummaries = !OnArray)
 
 # reorder them by sample size
