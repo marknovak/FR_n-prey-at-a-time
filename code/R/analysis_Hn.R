@@ -244,7 +244,11 @@ covars2 <- data.frame(t(sapply(ffr.fits, function(x) {
     pred.major.group = x$study.info$pred.major.grouping,
     prey.major.group = x$study.info$prey.major.grouping,
     predator.parasite = x$study.info$predator.parasite,
-    pred.vert.invert = x$study.info$pred.vert.invert
+    pred.vert.invert = x$study.info$pred.vert.invert,
+    pred.cellularity = x$study.info$predator.cellularity,
+    prey.cellularity = x$study.info$prey.cellularity,
+    habitat = x$study.info$habitat,
+    fresh.marine = x$study.info$fresh.marine
   ))})))
 covars3 <- data.frame(t(sapply(ffr.fits, function(x) {
   unlist(data.frame(
@@ -671,6 +675,54 @@ stargazer(fit.SSMed,
           # float.env = "sidewaystable",
           out = paste0(tabledir,'Hn_n-ppmr_SSgMed.tex')
 )
+
+###############################################################################
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Additional investigations
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Predator-prey mass-ratios by replacement vs. non-replacement studies
+stats <- function(x){c('mean'=mean(na.omit(x)), 'sd'=sd(na.omit(x)))}
+ppmr <- aggregate(log10(dat$pred.prey.mass.ratio), 
+          by = list(replacement = dat$replacement), 
+          FUN = stats)
+ppmr[,-1] <- 10^ppmr[,-1]
+ppmr
+
+breaks = 45
+hist(log10(dat$pred.prey.mass.ratio), 
+     breaks = breaks,
+     col = 'grey40')
+hist(log10(dat$pred.prey.mass.ratio[dat$replacement==FALSE]), 
+     breaks = breaks,
+     col = 'grey80',
+     add = TRUE)
+
+#~~~~~~~~~~~~~~~~~
+
+sel <- is.finite(dat$pred.prey.mass.ratio)
+fit <- lm(log.n ~ 
+            log.ppmr + 
+            predator.parasite + 
+            pred.vert.invert +
+            replacement +
+            dimension + 
+            habitat +
+            prey.cellularity
+          , 
+          data = dat[sel,])
+summary(fit)
+
+fit <- lm(log.n ~ 
+            log.ppmr + 
+            replacement +
+            dimension + 
+            habitat +
+            pred.major.group +
+            prey.major.group
+          , 
+          data = dat[sel,])
+summary(fit)
 
 
 ###############################################################################
