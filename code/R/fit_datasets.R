@@ -19,8 +19,8 @@ ClearAll <- TRUE
 holling.like.models <- c(
   "Holling.I",
   "Holling.II",
-  "Holling.n",
-  "Holling.III"
+  # "Holling.n",
+  "Holling.nIII"
 )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -29,8 +29,8 @@ holling.like.models <- c(
 # for non-replacement studies (which takes a very long time).  
 # We therefore bootstrap less often for these.
 
-boot.reps.replacement <- 1000
-boot.reps.nonreplacement <- 100
+boot.reps.replacement <- 2 #1000
+boot.reps.nonreplacement <- 2 #100
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(ClearAll){
@@ -96,9 +96,9 @@ if(OnArray){
 #     x$study.info$datasetID } )) %in% c(1500:1509))
 
 # # fit everything on a dataset-by-dataset basis
-for (i in iStart:iEnd) {
+# for (i in iStart:iEnd) {
   # for (i in selDatasets){
-  # for (i in 1:5) {
+  for (i in 1:2) {
 
   # grab all of dataset's information
   dataset <- datasets[[i]]

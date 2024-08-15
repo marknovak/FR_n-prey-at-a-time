@@ -8,7 +8,8 @@ set_params<-function(params,
                      model=c('Holling.I',
                              'Holling.II',
                              'Holling.n',
-                             'Holling.III'
+                             'Holling.III',
+                             'Holling.nIII'
                              )
                      ){
   
@@ -41,6 +42,12 @@ set_params<-function(params,
     assign('handling',     exp(params[2]), envir = .GlobalEnv)
     assign('n',            0, envir = .GlobalEnv)
     assign('m',            exp(params[3]), envir = .GlobalEnv)
+
+  } else  if(model == "Holling.nIII"){
+    assign('attack',       exp(params[1]), envir = .GlobalEnv)
+    assign('handling',     exp(params[2]), envir = .GlobalEnv)
+    assign('n',            exp(params[3]), envir = .GlobalEnv)
+    assign('m',            exp(params[4]), envir = .GlobalEnv)
 
   }  else  stop("Model not correctly specified in set_params()")
 }

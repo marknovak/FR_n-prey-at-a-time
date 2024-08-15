@@ -60,7 +60,10 @@ holling.like.1pred.1prey = function(N0, a, h, n, m, P, T,
 		if(h==0){ # For Type I things are simple:
 			N <- N0 * (1 - exp(-a * P * T))
 		} else { # For all other models...
-			if(integrate | modeltype == 'Holling.n' | modeltype == 'Holling.III'){  # solve by direct integration
+			if(integrate | 
+			   modeltype == 'Holling.n' | 
+			   modeltype == 'Holling.III'| 
+			   modeltype == 'Holling.nIII'){  # solve by direct integration
 				N <- numeric(length(N0))
 				for(i in seq.int(length(N0))){
 					# set parameters within ode solver
@@ -339,6 +342,14 @@ fit.holling.like <- function(
 				start <- list(
 					attack = coef(hollingII.via.mle2)["attack"],
 					handling = coef(hollingII.via.mle2)["handling"],
+					m = log(1) # given structural parameterization as 1+m
+				)
+		  }
+		  if(modeltype == "Holling.nIII"){
+				start <- list(
+					attack = coef(hollingII.via.mle2)["attack"],
+					handling = coef(hollingII.via.mle2)["handling"],
+					n = log(1), # given structural parameterization as 1+n
 					m = log(1) # given structural parameterization as 1+m
 				)
 			}

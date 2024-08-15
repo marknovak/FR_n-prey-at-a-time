@@ -18,7 +18,8 @@ resid.metric <- function(ffr.fit, metric = c('MAD', 'RMSD')){
       'Holling.I',
       'Holling.II',
       'Holling.n',
-      'Holling.III'
+      'Holling.III',
+      'Holling.nIII'
     )
     ){
       # predicted consumption
