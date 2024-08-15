@@ -25,7 +25,7 @@ source(sp)
 holling.like.1pred.1prey.sys = '
   #include<cmath>
 	// functional response for one predator one prey
-	dxdt[0] = -P * (a * x[0] * (1 - pow( a * h * x[0], (n + 1) ))) / (1 - pow( a * h * x[0], (n + 1 + 1)));
+	dxdt[0] = -P * (a * pow( x[0], (m + 1) ) * (1 - pow( a * h * pow( x[0], (m + 1)), (n + 1) )) / (1 - pow( a * h * pow( x[0], m + 1 ), (n + 1 + 1))));
 	// consumption rate cannot be positive
 	if(dxdt[0] > 0) dxdt[0] = 0;
 '
@@ -34,12 +34,12 @@ holling.like.1pred.1prey.sys = '
 odeintr::compile_sys(
 	"hl_1pred_1prey",
 	holling.like.1pred.1prey.sys,
-	pars = c("a", "h", "n", "P"),
+	pars = c("a", "h", "n", "m", "P"),
 	method = "rk78"
 )
 
 # predicted number of species consumed given parameters of a holling-like functional response
-holling.like.1pred.1prey = function(N0, a, h, n, P, T,
+holling.like.1pred.1prey = function(N0, a, h, n, m, P, T,
                                     replacement,
                                     modeltype,
                                     integrate=FALSE,
@@ -48,8 +48,8 @@ holling.like.1pred.1prey = function(N0, a, h, n, P, T,
 	# in a world with replacement everything is hunky dory
   # (again note +1 in exponent terms; see above)
 	if(replacement){
-		numer <- a * N0 * (1 - (a * h * N0)^(n + 1) )
-		denom <- (1 - (a * h * N0)^(n + 1 + 1))
+		numer <- a * (N0^(m + 1)) * (1 - (a * h * (N0^(m + 1)))^(n + 1) )
+		denom <- (1 - (a * h * (N0^(m + 1)))^(n + 1 + 1))
 		N <- (numer / denom) * P * T
 		N <- pmax(0,N)
 		return(N)
@@ -60,7 +60,7 @@ holling.like.1pred.1prey = function(N0, a, h, n, P, T,
 		if(h==0){ # For Type I things are simple:
 			N <- N0 * (1 - exp(-a * P * T))
 		} else { # For all other models...
-			if(integrate | modeltype == 'Holling.n'){  # solve by direct integration
+			if(integrate | modeltype == 'Holling.n' | modeltype == 'Holling.III'){  # solve by direct integration
 				N <- numeric(length(N0))
 				for(i in seq.int(length(N0))){
 					# set parameters within ode solver
@@ -68,6 +68,7 @@ holling.like.1pred.1prey = function(N0, a, h, n, P, T,
 						a=a,
 						h=h,
 						n=n,
+						m=m,
 						P=P[i]
 					)
 				  
@@ -99,7 +100,7 @@ holling.like.1pred.1prey = function(N0, a, h, n, P, T,
       			if(!overrideTranscendental){
 					if(any(is.infinite(N))){
 						# the explicit result of the analytical integration without solving for N implictly
-						ffff <- function(N, N0, P, T, a, h, n){
+						ffff <- function(N, N0, P, T, a, h, n, m){
 							dN <- log((N0 - N) / N0) - a * h * N
 							dt <- - a * P * T
 							dN - dt
@@ -114,7 +115,7 @@ holling.like.1pred.1prey = function(N0, a, h, n, P, T,
 								# we need to solve the transcendental equation directly
 								nn <- uniroot(ffff, lower=0, upper=N0[i], 
 								              N0=N0[i], P=P[i], T=T[i], 
-								              a=a, h=h, n=n)
+								              a=a, h=h, n=n, m=m)
 								N[i] <- nn$root
 							}
 						}
@@ -149,6 +150,7 @@ holling.like.1pred.1prey.predict = function(
 		a=attack,
 		h=handling,
     n=n,
+		m=m,
 		P=predators,
 		T=time,
 		replacement=replacement,
@@ -224,7 +226,8 @@ holling.like.1pred.1prey.NLL = function(params,
 parnames(holling.like.1pred.1prey.NLL) <- c(
 	'attack',
 	'handling',
-	'n'
+	'n',
+	'm'
 )
 
 # given data (d), study info (s), and modeltype (e.g., "Holling I"), fit functional response data
@@ -330,6 +333,13 @@ fit.holling.like <- function(
 					attack = coef(hollingII.via.mle2)["attack"],
 					handling = coef(hollingII.via.mle2)["handling"],
 					n = log(1) # given structural parameterization as 1+n
+				)
+			}
+		  if(modeltype == "Holling.III"){
+				start <- list(
+					attack = coef(hollingII.via.mle2)["attack"],
+					handling = coef(hollingII.via.mle2)["handling"],
+					m = log(1) # given structural parameterization as 1+m
 				)
 			}
 

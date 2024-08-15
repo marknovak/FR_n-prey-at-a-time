@@ -22,3 +22,7 @@ packages <-
     
   install.packages(packages, dependencies = TRUE)
   invisible(lapply(packages, library, character.only = TRUE))
+
+library(devtools)
+install_github('thk686/odeintr')
+library(odeintr)

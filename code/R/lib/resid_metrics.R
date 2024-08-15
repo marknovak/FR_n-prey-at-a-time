@@ -17,7 +17,8 @@ resid.metric <- function(ffr.fit, metric = c('MAD', 'RMSD')){
     if(modeltype %in% c(
       'Holling.I',
       'Holling.II',
-      'Holling.n'
+      'Holling.n',
+      'Holling.III'
     )
     ){
       # predicted consumption

@@ -19,7 +19,8 @@ ClearAll <- TRUE
 holling.like.models <- c(
   "Holling.I",
   "Holling.II",
-  "Holling.n"
+  "Holling.n",
+  "Holling.III"
 )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
