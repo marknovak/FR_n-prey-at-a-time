@@ -96,7 +96,9 @@ for (repl in c('Repl', 'nonRepl', 'All')){
     unlist(data.frame(
       Holling.I  = x[[IC]][['Holling.I']]['mean'],
       Holling.II = x[[IC]][['Holling.II']]['mean'],
-      Holling.n  = x[[IC]][['Holling.n']]['mean']
+      Holling.n  = x[[IC]][['Holling.n']]['mean'],
+      Holling.III  = x[[IC]][['Holling.III']]['mean'],
+      Holling.nIII  = x[[IC]][['Holling.nIII']]['mean']
     ))})))
   rownames(ICs) <- labels
   
@@ -114,16 +116,19 @@ for (repl in c('Repl', 'nonRepl', 'All')){
   
   Hn.single.best.IC <- evidence.IC[, 'Holling.n'] & 
                           !evidence.IC[, 'Holling.II'] &
-                            !evidence.IC[, 'Holling.I'] 
+                            !evidence.IC[, 'Holling.I'] &
+                            !evidence.IC[, 'Holling.III'] &
+                            !evidence.IC[, 'Holling.nIII'] 
   
   # ~~~~~~~~~~~~
   # Venn diagram
   # ~~~~~~~~~~~~
   # Count of freq by which model(s) is "best"
   # Venn diagram gets exported by function, then re-imported below
+  cat.names <- c("Type I " , "Type II" , "n-prey", "Type III", "Type nIII")
   venn.diagram(
     x = lapply(as.list(evidence.IC), function(x){(1:nrow(evidence.IC))[x]}),
-    category.names = c("Type I " , "Type II" , "n-prey"),
+    category.names = cat.names,
     filename = paste0(figdir, 'Hn_venn_', repl, '.png'),
     output = FALSE,
     
@@ -138,7 +143,7 @@ for (repl in c('Repl', 'nonRepl', 'All')){
     # Circles
     lwd = 0.1,
     lty = 1,
-    fill = brewer.pal(3, "Pastel2"),
+    fill = brewer.pal(length(cat.names), "Pastel2"),
   
     # Numbers
     cex = 0.6,
@@ -149,7 +154,7 @@ for (repl in c('Repl', 'nonRepl', 'All')){
     cat.cex = 0.6,
     cat.fontface = "bold",
     cat.default.pos = "outer",
-    cat.pos = c(0, 0, 180),
+    # cat.pos = c(0, 0, 180),
     cat.fontfamily = "sans"
   )
   venn <- readPNG(paste0(figdir, 'Hn_venn_', repl, '.png'))
@@ -284,7 +289,7 @@ for (p in 1:length(focal.preds)){
 temp.evidence.IC <- evidence.IC[covars$pred.major.group == focal.preds[p],]
   venn.diagram(
     x = lapply(as.list(temp.evidence.IC), function(x){(1:nrow(temp.evidence.IC))[x]}),
-    category.names = c("Type I " , "Type II" , "n-prey"),
+    category.names = cat.names,
     filename = paste0(figdir, 'Hn_venn_', focal.preds[p], '.png'),
     output = FALSE,
     
@@ -299,7 +304,7 @@ temp.evidence.IC <- evidence.IC[covars$pred.major.group == focal.preds[p],]
     # Circles
     lwd = 0.1,
     lty = 1,
-    fill = brewer.pal(3, "Pastel2"),
+    fill = brewer.pal(length(cat.names), "Pastel2"),
     
     # Numbers
     cex = 0.6,
@@ -310,7 +315,7 @@ temp.evidence.IC <- evidence.IC[covars$pred.major.group == focal.preds[p],]
     cat.cex = 0.6,
     cat.fontface = "bold",
     cat.default.pos = "outer",
-    cat.pos = c(0, 0, 180),
+    # cat.pos = c(0, 0, 180),
     cat.fontfamily = "sans"
   )
 }
