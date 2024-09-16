@@ -757,9 +757,66 @@ fit <- lm(log.n ~
 summary(fit)
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Hill exponent of Type III and nIII ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# cumulative distribution of n estimates ----
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cumdens <- ecdf(log2(dat$parm.m))
+
+pdf(paste0(figdir, 'HIII_m-ecdf.pdf'), height = 3, width = 4.25)
+par(
+  mar = c(3, 3, 1, 1),
+  mgp = c(1.5, 0.2, 0),
+  tcl = -0.1,
+  las = 1,
+  cex = 0.7,
+  yaxs = 'i')
+
+plot(cumdens,
+     col.01line = NA,
+     axes = FALSE,
+     main = '',
+     xlab = expression(paste('Hill exponent ', (italic(phi)))),
+     ylab = expression(paste('Probability ', P(italic(X) <= italic(n)))),
+     ylim = c(0.5, 1.05),
+     verticals = TRUE,
+     do.points = FALSE
+)
+xat <- 0:10
+axis(1, at = xat, labels = 2^xat)
+axis(2)
+box(lwd = 1)
+xat <- c(2, 4, 8, 16, 32)
+segments(log2(xat), 0, log2(xat), cumdens(log2(xat)),
+         col = 'grey80',
+         lty = 2)
+segments(-10, cumdens(log2(xat)), log2(xat), cumdens(log2(xat)),
+         col = 'grey80',
+         lty = 2)
+legend(
+  'bottomright', 
+  ncol = 2L,
+  inset = 0.01,
+  legend = c(expression(italic(phi)), 
+             xat, 
+             expression(P(italic(X) <= italic(n))),
+             round(cumdens(log2(xat)), 3))
+)
+dev.off()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Hill exponent vs. pred-prey mass-ratio ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 dat$log.ppmr <- log(dat$pred.prey.mass.ratio, base.ppmr)
 dat$log.m <- log(dat$parm.III.m, base.n)
 
@@ -865,7 +922,9 @@ stargazer(fit.m.all, fit.m.g1,
           )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Relationship between n and Hill exponent (m) ----
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Across n-prey and Type III
 # and 
@@ -927,9 +986,6 @@ par(
         use.expr = FALSE)
       mtext('(B)', side = 3, line = 0, at = 1)
 dev.off()
-
-
-
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
