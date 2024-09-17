@@ -125,7 +125,7 @@ for (repl in c('Repl', 'nonRepl', 'All')){
   # ~~~~~~~~~~~~
   # Count of freq by which model(s) is "best"
   # Venn diagram gets exported by function, then re-imported below
-  cat.names <- c("Type I " , "Type II" , "n-prey", "Type III", "Type nIII")
+  cat.names <- c("Type I " , "Type II" , "Multi-prey", "Type III", "Gener.")
   venn.diagram(
     x = lapply(as.list(evidence.IC), function(x){(1:nrow(evidence.IC))[x]}),
     category.names = cat.names,
@@ -138,7 +138,7 @@ for (repl in c('Repl', 'nonRepl', 'All')){
     width = 800 , 
     resolution = 400,
     disable.logging = TRUE,
-    margin = 0.02,
+    margin = 0.15,
     
     # Circles
     lwd = 0.1,
@@ -146,7 +146,7 @@ for (repl in c('Repl', 'nonRepl', 'All')){
     fill = brewer.pal(length(cat.names), "Pastel2"),
   
     # Numbers
-    cex = 0.6,
+    cex = 0.4,
     fontface = "bold",
     fontfamily = "sans",
     
@@ -768,7 +768,7 @@ summary(fit)
 # cumulative distribution of n estimates ----
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-cumdens <- ecdf(log2(dat$parm.m))
+cumdens <- ecdf(log2(dat$parm.III.m))
 
 pdf(paste0(figdir, 'HIII_m-ecdf.pdf'), height = 3, width = 4.25)
 par(
@@ -784,16 +784,16 @@ plot(cumdens,
      axes = FALSE,
      main = '',
      xlab = expression(paste('Hill exponent ', (italic(phi)))),
-     ylab = expression(paste('Probability ', P(italic(X) <= italic(n)))),
-     ylim = c(0.5, 1.05),
+     ylab = expression(paste('Probability ', P(italic(X) <= italic(phi)))),
+     ylim = c(0.3, 1.05),
      verticals = TRUE,
      do.points = FALSE
 )
-xat <- 0:10
+xat <- c(0, log2(1.5), 1:10)
 axis(1, at = xat, labels = 2^xat)
 axis(2)
 box(lwd = 1)
-xat <- c(2, 4, 8, 16, 32)
+xat <- c(1.5, 2, 4, 8)
 segments(log2(xat), 0, log2(xat), cumdens(log2(xat)),
          col = 'grey80',
          lty = 2)
@@ -806,7 +806,7 @@ legend(
   inset = 0.01,
   legend = c(expression(italic(phi)), 
              xat, 
-             expression(P(italic(X) <= italic(n))),
+             expression(P(italic(X) <= italic(phi))),
              round(cumdens(log2(xat)), 3))
 )
 dev.off()
@@ -854,11 +854,13 @@ par(
   lines(base.ppmr^(dts$log.ppmr), 
         base.n^(dts$pred), 
         col = 'black',
-        lwd = 3)
+        lwd = 3,
+        lty = 1)
   lines(base.ppmr^(dts$log.ppmr), 
         base.n^(dts$pred), 
         col = 'blue',
-        lwd = 2)
+        lwd = 2,
+        lty = 2)
 
   
   # Subset further to estimates of n > 1 ----
@@ -875,11 +877,13 @@ par(
   lines(base.ppmr^(dts$log.ppmr), 
         base.n^(dts$pred), 
         col = 'black',
-        lwd = 3)
+        lwd = 3,
+        lty = 1)
   lines(base.ppmr^(dts$log.ppmr), 
         base.n^(dts$pred), 
         col = 'red',
-        lwd = 2)
+        lwd = 2,
+        lty = 2)
   
   legend('topright',
          legend = c(expression(phi > 1), expression(phi >= 1)),
@@ -915,7 +919,7 @@ stargazer(fit.m.all, fit.m.g1,
           single.row = TRUE,
           align = FALSE,
           notes.label = '',
-          label = 'tab:n-ppmr',
+          label = 'tab:m-ppmr',
           title = paste0("Summary statistics (with 95\\% confidence intervals) for the least-squares linear regressions of $log_2(\\phi)$ of the Holling-Real Type III on ", covarlab, " when considering all studies ($\\phi \\geq$ 1) or only those studies for which $\\phi$ \\textgreater 1."),
           # float.env = "sidewaystable",
           out = paste0(tabledir,'HIII_m-ppmr.tex')
