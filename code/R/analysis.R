@@ -321,7 +321,7 @@ temp.evidence.IC <- evidence.IC[covars$pred.major.group == focal.preds[p],]
     width = 800 , 
     resolution = 400,
     disable.logging = TRUE,
-    margin = 0.02,
+    margin = 0.15,
     
     # Circles
     lwd = 0.1,
@@ -329,7 +329,7 @@ temp.evidence.IC <- evidence.IC[covars$pred.major.group == focal.preds[p],]
     fill = brewer.pal(length(cat.names), "Pastel2"),
     
     # Numbers
-    cex = 0.6,
+    cex = 0.4,
     fontface = "bold",
     fontfamily = "sans",
     
