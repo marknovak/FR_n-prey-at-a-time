@@ -30,8 +30,8 @@ holling.like.models <- c(
 # for non-replacement studies (which takes a very long time).  
 # We therefore bootstrap less often for these.
 
-boot.reps.replacement <- 1000
-boot.reps.nonreplacement <- 100
+boot.reps.replacement <- 2
+boot.reps.nonreplacement <- 2
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(ClearAll){
@@ -92,14 +92,13 @@ if(OnArray){
   iEnd <- length(datasets)
 }
 
-# selDatasets <- 
-#   which(unlist(lapply(datasets, function(x){
-#     x$study.info$datasetID } )) %in% c(1500:1509))
+selDatasets <-
+  which(unlist(lapply(datasets, function(x){
+    x$study.info$datasetID } )) %in% c(48))
 
 # # fit everything on a dataset-by-dataset basis
-for (i in iStart:iEnd) {
-  # for (i in selDatasets){
-  # for (i in 1:2) {
+# for (i in iStart:iEnd) {
+  for (i in selDatasets){
 
   # grab all of dataset's information
   dataset <- datasets[[i]]
@@ -155,8 +154,9 @@ for (i in iStart:iEnd) {
   # perform 1 or many bootstrapped fits
   for (b in 1:boot.reps) {
     # some bootstrapped data fails for reasons hard to determine
-    bad.fit <- TRUE
-    while (bad.fit) {
+    failed.fit <- TRUE
+    failed.fit.count <- 0
+    while (failed.fit) {
       # generate bootstrapped data if necessary
       if (boot.reps > 1) {
         d <- bootstrap.data(d.orig, 
@@ -176,9 +176,14 @@ for (i in iStart:iEnd) {
         }
       })
       
+      # the fit failed, so count it
+      if (inherits(success, "try-error")) {
+        failed.fit.count <- failed.fit.count + 1
+      }
+      
       # the fit succeeded we can continue to the next bootstrap
       if (!inherits(success, "try-error")) {
-        bad.fit <- FALSE
+        failed.fit <- FALSE
         setTxtProgressBar(pb, b)
       }
     }
@@ -237,7 +242,8 @@ for (i in iStart:iEnd) {
       AICcs = local.AICcs,
       BICs = local.BICs,
       RMSDs = local.RMSDs,
-      MADs = local.MADs
+      MADs = local.MADs,
+      failed.fit.count = failed.fit.count
     )
   }
   
@@ -259,7 +265,8 @@ for (i in iStart:iEnd) {
     AICc = lapply(bootstrap.fits, function(x) x$AICcs),
     BIC = lapply(bootstrap.fits, function(x) x$BICs),
     RMSD = lapply(bootstrap.fits, function(x) x$RMSDs),
-    MAD = lapply(bootstrap.fits, function(x) x$MADs)
+    MAD = lapply(bootstrap.fits, function(x) x$MADs),
+    failed.fit.count = failed.fit.count
   )
   
   # Save the data set fit monster object
