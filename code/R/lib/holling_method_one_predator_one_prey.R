@@ -171,8 +171,8 @@ holling.like.1pred.1prey.NLL = function(params,
                                         predators,
                                         replacement,
                                         time=NULL,
-                                        penalized.nll = FALSE,
-                                        lambda = 1/log(40)
+                                        penalized.nll = TRUE,
+                                        lambda = 1/log(20)
                                         ){
 
 	# expected number consumed given data and parameters
@@ -200,22 +200,19 @@ holling.like.1pred.1prey.NLL = function(params,
 			if(is.nan(nll)){
 			  nll <- Inf
 			}
-			# return(nll)
 		}
 
 		# negative log likelihood based on total number consumed (replacement)
 		if(replacement){
 			nll <- -sum(dpois(killed, Nconsumed, log=TRUE))
-			# return(nll)
 		}
 	  
 	  if(penalized.nll){
-	    # Penalize the nll by the value of 'n' (recalling that, given the structure
-	    # of the parameterized n-prey model, we must add 1 to n to get "true" n)
-	    # A lambda of 1/3 roughly corresponds to a value of n = 20 counting as 1/2
-	    # a unit of log-likelihood
+	    # Penalize the nll by the value of 'n' or 'm' (recalling that, given the structure
+	    # of the parameterized models, we must add 1 to n or m to get "true" n or m).
+	    # A lambda of 1/log(2) corresponds to a value of n or m = 2 counting as 1 log-likelihood unit
 	    set_params(params, modeltype)
-	    nll <- nll + lambda * log(1 + n)
+	    nll <- nll + lambda * log(1 + n) + lambda * log(1 + m)
 	  }
 	  
 	  return(nll)
@@ -238,15 +235,15 @@ fit.holling.like <- function(
 	d,
 	s,
 	modeltype,
-	nloptr.control=list(),
-	mle2.control=list(),
-	skip.hessian = FALSE,
+	nloptr.control = list(),
+	mle2.control = list(),
+	skip.hessian = TRUE,
 	...
 ){
 
 	# estimate starting value from the data using linear regression
 	start <- list(
-		attack = log(coef(lm(d$Nconsumed~ 0+ I(d$Npredator * d$Nprey * d$Time))))
+		attack = log(coef(lm(d$Nconsumed~ 0 + I(d$Npredator * d$Nprey * d$Time))))
 	)
 
 	# fit Holling Type I via MLE with above starting parameter value
@@ -371,30 +368,31 @@ fit.holling.like <- function(
 			# convert nloptr estimation to list of starting values
 			mle2.start <- as.list(fit.via.sbplx$par)
 			names(mle2.start) <- names(start)
-
-			# fit with mle2 since this provides other convenience estimates
-			fit.via.mle2 <- bbmle::mle2(
-				minuslogl = holling.like.1pred.1prey.NLL,
-				start = mle2.start,
-				data = list(
-					initial = d$Nprey,
-					killed = d$Nconsumed,
-					predators = d$Npredator,
-					time = d$Time,
-					replacement = s$replacement,
-					modeltype = modeltype
-				),
-				vecpar = TRUE,
-				control = mle2.control,
-				skip.hessian = skip.hessian
-			)
+			
+			# # fit with mle2 since this provides other convenience estimates
+			# fit.via.mle2 <- bbmle::mle2(
+			# 	minuslogl = holling.like.1pred.1prey.NLL,
+			# 	start = mle2.start,
+			# 	data = list(
+			# 		initial = d$Nprey,
+			# 		killed = d$Nconsumed,
+			# 		predators = d$Npredator,
+			# 		time = d$Time,
+			# 		replacement = s$replacement,
+			# 		modeltype = modeltype
+			# 	),
+			# 	vecpar = TRUE,
+			# 	control = mle2.control,
+			# 	skip.hessian = skip.hessian
+			# )
 
 			# convert mle2 estimation to list of starting values
-			mle2.start <- as.list(fit.via.mle2@coef)
-			names(mle2.start) <- names(start)
+			# mle2.start <- as.list(fit.via.mle2@coef)
+			# names(mle2.start) <- names(start)
 
 			# apparently this helps optimize over complex likelihood surfaces and get SEs when they weren't there otherwise...
-			mle2.control$parscale <- abs(fit.via.mle2@coef)
+			# mle2.control$parscale <- abs(fit.via.mle2@coef)
+      mle2.control$parscale <- abs(fit.via.sbplx$par)
 
 			# refit with mle2 using parscale to help get an appropriate covariance matrix for the parameters
 			refit.via.mle2 <- bbmle::mle2(
