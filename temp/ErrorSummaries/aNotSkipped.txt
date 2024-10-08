@@ -928,7 +928,6 @@
 "1054-Ya?ar and Ozger 2005"
 "1055-Ya?ar and Ozger 2005"
 "1056-Ya?ar and Ozger 2005"
-"1057-Gismervik 2005"
 "1058-Zarghami et al 2016"
 "1059-Zarghami et al 2016"
 "1060-Zarghami et al 2016"
