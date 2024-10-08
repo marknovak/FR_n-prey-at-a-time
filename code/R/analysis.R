@@ -237,7 +237,7 @@ ests.III <- data.frame(t(sapply(ffr.fits, function(x) {
   unlist(data.frame(
     parm.III.a  = exp(x$estimates[['Holling.III']][point.est, 'attack', "estimate"]),
     parm.III.h =  exp(x$estimates[['Holling.III']][point.est, 'handling', "estimate"]),
-    # ====> Note that we do n + 1 given how the model was constrained <=====
+    # ====> Note that we do m + 1 given how the model was constrained <=====
     parm.III.m  = exp.p1(x$estimates[['Holling.III']][point.est, 'm', "estimate"])
 
   ))})))
@@ -247,7 +247,7 @@ ests.nIII <- data.frame(t(sapply(ffr.fits, function(x) {
   unlist(data.frame(
     parm.nIII.a  = exp(x$estimates[['Holling.nIII']][point.est, 'attack', "estimate"]),
     parm.nIII.h =  exp(x$estimates[['Holling.nIII']][point.est, 'handling', "estimate"]),
-    # ====> Note that we do n + 1 given how the model was constrained <=====
+    # ====> Note that we do n + 1 and m + 1 given how the models were constrained <=====
     parm.nIII.n  = exp.p1(x$estimates[['Holling.nIII']][point.est, 'n', "estimate"]),
     parm.nIII.m  = exp.p1(x$estimates[['Holling.nIII']][point.est, 'm', "estimate"])
   ))})))
@@ -257,6 +257,7 @@ rownames(ests.nIII) <- labels
 covars1 <- data.frame(t(sapply(ffr.fits, function(x) {
   unlist(data.frame(
     sample.size = x$study.info$sample.size,
+    failed.fits = x$failed.fit.count,
     pred.mass = x$study.info$predator.mass,
     prey.mass = x$study.info$prey.mass,
     pred.prey.mass.ratio = x$study.info$predator.mass / x$study.info$prey.mass,
@@ -297,6 +298,14 @@ covars$max.Nprey <-  unlist(lapply(ffr.fits, function(x){
 
 dat <- data.frame(ests.n, ests.III, ests.nIII, covars)
 
+# ~~~~~~~~~~~
+# Failed fits
+# ~~~~~~~~~~~
+h <- hist(dat$failed.fits, breaks = 100)
+h <- hist(dat$failed.fits[dat$failed.fits>0], breaks = 100)
+
+# subset(dat, failed.fits > 10)
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Venn diagrams by predator group ----
 # ~~~~~~~~~~~~
@@ -304,6 +313,7 @@ pmg <- table(dat$pred.major.group)
 pmg <- pmg[order(pmg, decreasing = TRUE)]
 cumsum(pmg)/sum(pmg)
 
+if(sum(pmg > 100) > 0){
 focal.preds <- names(pmg[which(pmg > 100)])
 focal.preds.cols <- brewer.pal(length(focal.preds), 'Accent')
 
@@ -341,6 +351,7 @@ temp.evidence.IC <- evidence.IC[covars$pred.major.group == focal.preds[p],]
     cat.fontfamily = "sans"
   )
 }
+}
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -354,7 +365,6 @@ T1 <- evidence.IC$Holling.I & apply(evidence.IC, 1, sum) == 1
 # evidence.IC[T1,]
 
 dat <- dat[!T1,]
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -504,6 +514,7 @@ dev.off()
 # n vs. body size by predator identity ----
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if(length(focal.preds) > 0){
 sel <- is.finite(dat$pred.prey.mass.ratio) &
         dat$pred.major.group %in% focal.preds
 
@@ -586,7 +597,7 @@ par(
     )
     box(lwd = 1)
 dev.off()
-         
+}        
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # n vs. body size (high sample size studies only) ----
@@ -721,14 +732,14 @@ ppmr <- aggregate(log10(dat$pred.prey.mass.ratio),
 ppmr[,-1] <- 10^ppmr[,-1]
 ppmr
 
-breaks = 45
-hist(log10(dat$pred.prey.mass.ratio), 
-     breaks = breaks,
-     col = 'grey40')
-hist(log10(dat$pred.prey.mass.ratio[dat$replacement==FALSE]), 
-     breaks = breaks,
-     col = 'grey80',
-     add = TRUE)
+# breaks = 45
+# hist(log10(dat$pred.prey.mass.ratio), 
+#      breaks = breaks,
+#      col = 'grey40')
+# hist(log10(dat$pred.prey.mass.ratio[dat$replacement==FALSE]), 
+#      breaks = breaks,
+#      col = 'grey80',
+#      add = TRUE)
 
 #~~~~~~~~~~~~~~~~~
 
@@ -982,8 +993,8 @@ par(
     abline(0, 1, 
          lty = 2,
          col = 'grey')
-    eaxis(1, at = base.n^seq(-2, 10), 
-        labels = base.n^seq(-2, 10), 
+    eaxis(1, at = 10^seq(0, 300, 10), 
+        labels = 10^seq(0, 300, 10), 
         use.expr = FALSE)
     eaxis(2, at = base.n^seq(-2, 10), 
         labels = base.n^seq(-2, 10), 

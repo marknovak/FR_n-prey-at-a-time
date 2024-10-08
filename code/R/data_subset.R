@@ -17,7 +17,14 @@ subset_data <- function(datasets, exportSummaries = FALSE,
                      2379:2385,  # Reeve 1963 variable (unknown) volumes
                      785:791, # Båmstedt 1990 variable durations and predator numbers
                      990, # Dinis et al 2016  *
-                     1907 # Korstad et al 1989 *
+                     1907, # Korstad et al 1989 *
+                     1057, # Gismervik 2005 failed to converge even for Type I
+                     839, # Reeve et al 1978
+                     1060, # Zarghami et al 2016
+                     2126, # Cuthbert et al. 2020
+                     2124, # Cuthbert et al. 2020
+                     2908, # Dalel et al. 2023
+                     784 # Sornes & Aksnes 2004
                      ) 
   
 # * Unable to fit due to absence of low prey abundance variation.  Potentially also due to complete depletion of prey at low abundances.

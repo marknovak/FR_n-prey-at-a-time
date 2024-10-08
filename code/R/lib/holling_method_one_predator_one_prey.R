@@ -250,12 +250,12 @@ fit.holling.like <- function(
 	hollingI.via.sbplx <- nloptr::sbplx(
 		x0 = unlist(start),
 		fn = holling.like.1pred.1prey.NLL,
-		modeltype="Holling.I",
-		initial=d$Nprey,
-		killed=d$Nconsumed,
-		predators=d$Npredator,
-		time=d$Time,
-		replacement=s$replacement,
+		modeltype = "Holling.I",
+		initial = d$Nprey,
+		killed = d$Nconsumed,
+		predators = d$Npredator,
+		time = d$Time,
+		replacement = s$replacement,
 		control = nloptr.control,
 		...
 	)
@@ -268,12 +268,12 @@ fit.holling.like <- function(
 		minuslogl = holling.like.1pred.1prey.NLL,
 		start = mle2.start,
 		data = list(
-			initial=d$Nprey,
-			killed=d$Nconsumed,
-			predators=d$Npredator,
-			time=d$Time,
-			replacement=s$replacement,
-			modeltype="Holling.I"
+			initial = d$Nprey,
+			killed = d$Nconsumed,
+			predators = d$Npredator,
+			time = d$Time,
+			replacement = s$replacement,
+			modeltype = "Holling.I"
 		),
 		vecpar = TRUE,
 		control = mle2.control,
@@ -369,30 +369,29 @@ fit.holling.like <- function(
 			mle2.start <- as.list(fit.via.sbplx$par)
 			names(mle2.start) <- names(start)
 			
-			# # fit with mle2 since this provides other convenience estimates
-			# fit.via.mle2 <- bbmle::mle2(
-			# 	minuslogl = holling.like.1pred.1prey.NLL,
-			# 	start = mle2.start,
-			# 	data = list(
-			# 		initial = d$Nprey,
-			# 		killed = d$Nconsumed,
-			# 		predators = d$Npredator,
-			# 		time = d$Time,
-			# 		replacement = s$replacement,
-			# 		modeltype = modeltype
-			# 	),
-			# 	vecpar = TRUE,
-			# 	control = mle2.control,
-			# 	skip.hessian = skip.hessian
-			# )
+			# fit with mle2 since this provides other convenience estimates
+			fit.via.mle2 <- bbmle::mle2(
+				minuslogl = holling.like.1pred.1prey.NLL,
+				start = mle2.start,
+				data = list(
+					initial = d$Nprey,
+					killed = d$Nconsumed,
+					predators = d$Npredator,
+					time = d$Time,
+					replacement = s$replacement,
+					modeltype = modeltype
+				),
+				vecpar = TRUE,
+				control = mle2.control,
+				skip.hessian = skip.hessian
+			)
 
 			# convert mle2 estimation to list of starting values
-			# mle2.start <- as.list(fit.via.mle2@coef)
-			# names(mle2.start) <- names(start)
+			mle2.start <- as.list(fit.via.mle2@coef)
+			names(mle2.start) <- names(start)
 
 			# apparently this helps optimize over complex likelihood surfaces and get SEs when they weren't there otherwise...
-			# mle2.control$parscale <- abs(fit.via.mle2@coef)
-      mle2.control$parscale <- abs(fit.via.sbplx$par)
+			mle2.control$parscale <- abs(fit.via.mle2@coef)
 
 			# refit with mle2 using parscale to help get an appropriate covariance matrix for the parameters
 			refit.via.mle2 <- bbmle::mle2(
@@ -408,6 +407,7 @@ fit.holling.like <- function(
 				),
 				vecpar = TRUE,
 				control = mle2.control,
+				# method = 'Nelder-Mead',
 				skip.hessian = skip.hessian
 			)
 

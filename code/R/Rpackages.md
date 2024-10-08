@@ -8,6 +8,9 @@
 # >>> install.packages("xxx")
 
 
+# CMake is needed (or nloptr (on which other used packages also depend), thus 
+# before installing the R package run "module load cmake/3.30.3" at the command line.
+
 packages <- 
   c(
    'bbmle',
@@ -15,9 +18,9 @@ packages <-
     'lamW',
     'shape',
     'HelpersMG',
-    'odeintr',
     'progress',
-    'stargazer'
+    'stargazer',
+    'devtools'
   )
     
   install.packages(packages, dependencies = TRUE)
