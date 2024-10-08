@@ -871,7 +871,7 @@ par(
         base.n^(dts$pred), 
         col = 'blue',
         lwd = 2,
-        lty = 2)
+        lty = 1)
 
   
   # Subset further to estimates of n > 1 ----
@@ -894,7 +894,7 @@ par(
         base.n^(dts$pred), 
         col = 'red',
         lwd = 2,
-        lty = 2)
+        lty = 1)
   
   legend('topright',
          legend = c(expression(phi > 1), expression(phi >= 1)),
