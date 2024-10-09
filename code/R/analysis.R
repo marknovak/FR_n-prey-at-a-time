@@ -118,7 +118,27 @@ for (repl in c('Repl', 'nonRepl', 'All')){
                           !evidence.IC[, 'Holling.II'] &
                             !evidence.IC[, 'Holling.I'] &
                             !evidence.IC[, 'Holling.III'] &
-                            !evidence.IC[, 'Holling.nIII'] 
+                            !evidence.IC[, 'Holling.nIII']
+  sum(Hn.single.best.IC)
+  sum(Hn.single.best.IC) / length(Hn.single.best.IC)
+  
+  MultiHandling.evidence.IC <- evidence.IC[, 'Holling.n'] | 
+                          evidence.IC[, 'Holling.I'] |
+                          evidence.IC[, 'Holling.nIII']
+  sum(MultiHandling.evidence.IC)
+  sum(MultiHandling.evidence.IC) / length(MultiHandling.evidence.IC)  
+
+  Linear.evidence.IC <- evidence.IC[, 'Holling.n'] | 
+                            evidence.IC[, 'Holling.I']
+  sum(Linear.evidence.IC)
+  sum(Linear.evidence.IC) / length(Linear.evidence.IC) 
+  
+  Hn.equally.well.IC <- evidence.IC[, 'Holling.n'] & evidence.IC[, 'Holling.II'] |
+                            evidence.IC[, 'Holling.n'] & evidence.IC[, 'Holling.I'] |
+                            evidence.IC[, 'Holling.n'] & evidence.IC[, 'Holling.III'] |
+                            evidence.IC[, 'Holling.n'] & evidence.IC[, 'Holling.nIII']
+  sum(Hn.equally.well.IC)
+  sum(Hn.equally.well.IC) / length(Hn.equally.well.IC)
   
   # ~~~~~~~~~~~~
   # Venn diagram ----
