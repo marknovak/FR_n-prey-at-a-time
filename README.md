@@ -1,8 +1,7 @@
 # A functional response for predators that can continue to search while handling up to $n$ prey at a time
 This repository contains the code and data for the analyses of:
 
-_**Novak, Coblentz & DeLong**_ (in review) *In defense of the Type I functional response:
-The frequency and population-dynamic effects of feeding on multiple prey at a time.*
+_**Novak, Coblentz & DeLong**_ (2024) *Feeding on multiple prey at a time: The frequency and population-dynamic effects of functional-response linearity.* [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.05.14.594210v2)
 
 ## Repository content
 Mathematical analyses (isoclines and simulations) were performed in [Mathematica](https://www.wolfram.com/mathematica/) _v.13.3_.
