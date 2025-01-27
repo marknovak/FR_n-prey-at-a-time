@@ -1,7 +1,7 @@
 # A functional response for predators that can continue to search while handling up to $n$ prey at a time
 This repository contains the code and data for the analyses of:
 
-_**Novak, Coblentz & DeLong**_ (2024) *Feeding on multiple prey at a time: The frequency and population-dynamic effects of functional-response linearity.* [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.05.14.594210v2)
+_**Novak, Coblentz & DeLong**_ (2024) *In defense of the original Type I functional response: The frequency and population-dynamic effects of feeding on multiple prey at a time.* [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.05.14.594210v4)
 
 ## Repository content
 Mathematical analyses (isoclines and simulations) were performed in [Mathematica](https://www.wolfram.com/mathematica/) _v.13.3_.
@@ -11,7 +11,7 @@ Statistical analyses of the [FoRAGE database](https://doi.org/10.5063/F17H1GTQ) 
 #### [_code_](code/)
 Within the [code/mathematica](code/mathematica/) subfolder, the notebook [FuncResp_n-prey-at-a-time.nb](code/mathematica/FuncResp_n-prey-at-a-time.nb) contains the primary analyses presented in the manuscript.
 
-Within the [code/R](code/R/) subfolder, [Rpackages.md](code/R/Rpackages.md) lists the required R packages, [data_prep.R](code/R/data_prep.R) standardizes the format of all FoRAGE datasets, [data_subset.R](code/R/data_subset.R) specifies which datasets are to be removed prior to model fitting, [fit_datasets.R](code/R/fit_datasets.R) performs the model fitting, and [analysis_Hn.R](code/R/analysis_Hn.R) is used for the analysis of the resulting fits.  Model fitting uses a library of functions located in the [lib](code/R/lib/) sub-folder originally developed with [Daniel Stouffer](https://github.com/stouffer) (see [General Functional Responses](https://github.com/stoufferlab/general-functional-responses) repository).
+Within the [code/R](code/R/) subfolder, [Rpackages.md](code/R/Rpackages.md) lists the required R packages, [data_prep.R](code/R/data_prep.R) standardizes the format of all FoRAGE datasets, [data_subset.R](code/R/data_subset.R) specifies which datasets are to be removed prior to model fitting, [fit_datasets.R](code/R/fit_datasets.R) performs the model fitting, and [analysis.R](code/R/analysis.R) is used for the analysis of the resulting fits.  Model fitting uses a library of functions located in the [lib](code/R/lib/) sub-folder originally developed with [Daniel Stouffer](https://github.com/stouffer) (see [General Functional Responses](https://github.com/stoufferlab/general-functional-responses) repository).
 
 
 #### [_data_](data/)
