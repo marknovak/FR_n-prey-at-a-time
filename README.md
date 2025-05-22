@@ -1,11 +1,22 @@
 # A functional response for predators that can continue to search while handling up to $n$ prey at a time
 This repository contains the code and data for the analyses of:
 
-_**Novak, Coblentz & DeLong**_ (2024) *In defense of the original Type I functional response: The frequency and population-dynamic effects of feeding on multiple prey at a time.* [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.05.14.594210v4)
+_**Novak, Coblentz & DeLong**_ (in press) *In defense of Type I functional responses: The frequency and population-dynamic effects of feeding on multiple prey at a time.* The American Naturalist (preprint on [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.05.14.594210v4))
 
 ## Repository content
 Mathematical analyses (isoclines and simulations) were performed in [Mathematica](https://www.wolfram.com/mathematica/) _v.13.3_.
 Statistical analyses of the [FoRAGE database](https://doi.org/10.5063/F17H1GTQ) were performed in [R](https://www.r-project.org) _v.4.3.2_.
+The latter have the following package dependencies: 
+    [_bbmle_](https://cran.r-project.org/web/packages/bbmle/index.html),
+    [_nloptr_](https://cran.r-project.org/web/packages/nloptr/index.html),
+    [_lamW_](https://cran.r-project.org/web/packages/lamW/index.html),
+    [_shape_](https://cran.r-project.org/web/packages/shape/index.html),
+    [_HelpersMG_](https://cran.r-project.org/web/packages/HelpersMG/index.html),
+    [_progress_](https://cran.r-project.org/web/packages/progress/index.html),
+    [_stargazer_](https://cran.r-project.org/web/packages/stargazer/index.html),
+    [_devtools_](https://cran.r-project.org/web/packages/devtools/index.html),
+    and
+    [_odeintr_](https://github.com/thk686/odeintr) (see [Rpackages.md](/code/R/Rpackages.md)).
 
 
 #### [_code_](code/)
@@ -18,11 +29,11 @@ Within the [code/R](code/R/) subfolder,
 * [fit_datasets.R](code/R/fit_datasets.R) performs the model fitting
 * [analysis.R](code/R/analysis.R) is used for the analysis of the resulting fits. 
 
-Model fitting uses a library of functions located in the [lib](code/R/lib/) sub-folder originally developed with [Daniel Stouffer](https://github.com/stouffer) (see [General Functional Responses](https://github.com/stoufferlab/general-functional-responses) repository).
+Model fitting uses a library of functions located in the [lib](code/R/lib/) sub-folder. These were originally developed with [Daniel Stouffer](https://github.com/stouffer) (see [General Functional Responses](https://github.com/stoufferlab/general-functional-responses) repository) used for Stouffer & Novak (2021) [Ecology Letters](https://doi.org/10.1111/ele.13670) ([bioRxiv](https://doi.org/10.1101/2020.08.25.263806)) and Novak & Stouffer (2021) [Ecology Letters](https://doi.org/10.1111/ele.13660) ([bioRxiv](https://doi.org/10.1101/2020.08.25.263814)).
 
 
 #### [_data_](data/)
-Contains the FoRAGE v4 database in .csv and .Rdata formats.  Individuals interested in using the [FoRAGE database](https://doi.org/10.5063/F17H1GTQ) for additional analyses should instead obtain it from [KNB - The Knowledge Network for Biocomplexity repository](https://doi.org/10.5063/F17H1GTQ) where the [FoRAGE database](https://doi.org/10.5063/F17H1GTQ) is maintained.
+Contains the [FoRAGE v4 database]((https://doi.org/10.5063/F17H1GTQ)) in .csv and .Rdata formats.  Individuals interested in using the [FoRAGE database](https://doi.org/10.5063/F17H1GTQ) for additional analyses should instead obtain it from [KNB - The Knowledge Network for Biocomplexity repository](https://doi.org/10.5063/F17H1GTQ) where the [FoRAGE database](https://doi.org/10.5063/F17H1GTQ) is maintained.  Please refer to the [KNB repository](https://doi.org/10.5063/F17H1GTQ) for the associated metadata.
 
 
 #### [_figs_](figs/) & [_tables_](tables/)
