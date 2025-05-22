@@ -36,12 +36,6 @@ Model fitting uses a library of functions located in the [lib](code/R/lib/) sub-
 Contains the [FoRAGE v4 database]((https://doi.org/10.5063/F17H1GTQ)) in .csv and .Rdata formats.  Individuals interested in using the [FoRAGE database](https://doi.org/10.5063/F17H1GTQ) for additional analyses should instead obtain it from [KNB - The Knowledge Network for Biocomplexity repository](https://doi.org/10.5063/F17H1GTQ) where the [FoRAGE database](https://doi.org/10.5063/F17H1GTQ) is maintained.  Please refer to the [KNB repository](https://doi.org/10.5063/F17H1GTQ) for the associated metadata.
 
 
-#### [_figs_](figs/) & [_tables_](tables/)
-These contain all figures and statistical tables associated with the manuscript, as well as unused supplemental figures.
-
-#### [_results_](results/) & [_temp_](temp/)
-The [results](results/fits) folder contains each of the dataset-specific model fits produced by [code/R/fit_datasets.R](code/R/fit_datasets.R).  The [temp](temp/) folder contains fitting error summaries for debugging purposes, as well as temporary Mathematica files generated during the mathematical analyses.
-
 
 ## _Warning_: Parameter interpretation
  As noted in the _Supplementary Materials_ of the above-referenced manuscript, unlike in the original analyses of the FoRAGE database (e.g., [Uiterwaal & DeLong 2022](https://doi.org/10.1002/ecy.3706)), the model-fitting analyses implemented here have _not_ standardized prey and predator abundances by area (or volume) and have _not_ standardized prey consumption values by time.  Therefore, estimates of the attack rates and handling times are dataset-specific (i.e. are not in common units) and should not be compared across datasets.  Estimates of the maximum number of prey that can be handled at a time (parameter _n_ of the multi-prey functional response model) are unitless.
