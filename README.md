@@ -1,7 +1,9 @@
 # A functional response for predators that can continue to search while handling up to $n$ prey at a time
 This repository contains the code and data for the analyses of:
 
-_**Novak, Coblentz & DeLong**_ (in press) *In defense of Type I functional responses: The frequency and population-dynamic effects of feeding on multiple prey at a time.* The American Naturalist (preprint on [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.05.14.594210v4))
+_**Novak, Coblentz & DeLong**_ (2025) *In defense of Type I functional responses: The frequency and population-dynamic effects of feeding on multiple prey at a time.* [The American Naturalist](https://www.journals.uchicago.edu/doi/10.1086/737023) [[bioRxiv](https://www.biorxiv.org/content/10.1101/2024.05.14.594210v4)]
+
+See also [PCI Ecology Recommendation](https://ecology.peercommunityin.org/PCIEcology/articles/rec?id=702).
 
 ## Repository content
 Mathematical analyses (isoclines and simulations) were performed in [Mathematica](https://www.wolfram.com/mathematica/) _v.13.3_.
@@ -45,9 +47,6 @@ The [results](results/fits) folder contains each of the dataset-specific model f
 
 ## _Warning_: Parameter interpretation
  As noted in the _Supplementary Materials_ of the above-referenced manuscript, unlike in the original analyses of the FoRAGE database (e.g., [Uiterwaal & DeLong 2022](https://doi.org/10.1002/ecy.3706)), the model-fitting analyses implemented here have _not_ standardized prey and predator abundances by area (or volume) and have _not_ standardized prey consumption values by time.  Therefore, estimates of the attack rates and handling times are dataset-specific (i.e. are not in common units) and should not be compared across datasets.  Estimates of the maximum number of prey that can be handled at a time (parameter _n_ of the multi-prey functional response model) are unitless.
-
-## Warranty
- All code is provided "as is" and without warranty.
 
  ## Contact
  Please email Mark Novak (mark.novak@oregonstate.edu) with any questions about the analyses and John DeLong (jpdelong@unl.edu) with any questions about the [FoRAGE database](https://doi.org/10.5063/F17H1GTQ).
